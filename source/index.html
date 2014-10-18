@@ -15,15 +15,33 @@
                 <directionalLight id="directional" direction='0 -1 0' on ="TRUE" intensity='1.0' shadowIntensity='0.5'  shadowCascades="1" shadowFilterSize="16" shadowMapSize="512">
                 </directionalLight>
 
-                <Shape>
-                    <Appearance><Material diffuseColor="0 0 0.8"></Material></Appearance>
-                    <Sphere radius="10"></Sphere>
-                </Shape>
+                <inline url="./scaffold.x3d"></inline>
+
+                <transform translation='0 0 -20'>
+                    <Shape>
+                        <Appearance><Material diffuseColor="1.0 0.0 0.0"></Material></Appearance>
+                        <Sphere radius="8"></Sphere>
+                    </Shape>
+                </transform>
+
+                <transform translation='-10 0 0'>
+                    <Shape>
+                        <Appearance><Material diffuseColor="0.0 1.0 0.0"></Material></Appearance>
+                        <Sphere radius="8"></Sphere>
+                    </Shape>
+                </transform>
+
+                <transform translation='10 0 0'>
+                    <Shape>
+                        <Appearance><Material diffuseColor="0.0 0.0 1.0"></Material></Appearance>
+                        <Sphere radius="8"></Sphere>
+                    </Shape>
+                </transform>
 
                 <Transform translation="0 -12.5 0" rotation="1 0 0 -1.57">
                     <Shape>
                         <Appearance><Material diffuseColor="0.7 0.7 0.7"></Material></Appearance>
-                        <Plane solid="false" size="50 50"></Plane>
+                        <Plane solid="false" size="100 100"></Plane>
                     </Shape>
                 </Transform>
 
