@@ -1,9 +1,10 @@
-var runtime = null;
-var rtLeft, rtRight;
-var lastW, lastH;
+(function() {
 
-document.onload = function ()
-{
+var runtime = null,
+    rtLeft, rtRight, lastW, lastH,
+    hasOculus = false;
+
+document.onload = function () {
     runtime = document.getElementById('x3d').runtime;
     rtLeft = document.getElementById('rtLeft');
     rtRight = document.getElementById('rtRight');
@@ -31,3 +32,18 @@ document.onload = function ()
         }
     };
 };
+
+Mousetrap.bind('x', function() {
+    if( hasOculus ) {
+        document.getElementById('root').setAttribute('render', 'false');
+        document.getElementById('leftEye').setAttribute('render', 'true');
+        document.getElementById('rightEye').setAttribute('render', 'true');
+    } else {
+        document.getElementById('root').setAttribute('render', 'true');
+        document.getElementById('leftEye').setAttribute('render', 'false');
+        document.getElementById('rightEye').setAttribute('render', 'false');
+    }
+    hasOculus = !hasOculus;
+});
+
+}());

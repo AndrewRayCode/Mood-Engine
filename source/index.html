@@ -16,7 +16,7 @@
                     orientation='0 1 0 2.99229' position='0.0 0.0 -200'
                     zNear="0.001" zFar="800"></viewpoint>
 
-                <group id='root' render='false'>
+                <group id='root' render="false">
                     <group DEF='theScene'>
                         <navigationInfo id="head" headlight='true' type='"EXAMINE"'></navigationInfo>
                         <background  skyColor="0 0 0"></background>
@@ -27,21 +27,28 @@
                             intensity='0.9000'
                             color="1 1 1"
                             shadowIntensity='0.5'
-                            shadowFilterSize="32"
-                            shadowCascades="10"
+                            shadowFilterSize="124"
+                            shadowCascades="2"
                             location="0 0 0"
                             radius='800'></PointLight>
 
-                        <inline url="./assets/scaffold.x3d"></inline>
+                        <!-- Nest -->
+                        <Transform scale="2.0 2.0 2.0">
+                            <inline url="./assets/scaffold.x3d"></inline>
+                        </Transform>
 
-                        <Transform translation="0 -100 0" rotation="1 0 0 -1.57">
+                        <!-- Charms -->
+                        <inline url="./assets/octStarW8R30.x3d"></inline>
+                        <inline url="./assets/circleW5R20.x3d"></inline>
+
+                        <Transform translation="0 -200 0" rotation="1 0 0 -1.57">
                             <Shape>
                                 <Appearance><Material diffuseColor="0.7 0.7 0.7"></Material></Appearance>
                                 <Plane solid="false" size="200 200"></Plane>
                             </Shape>
                         </Transform>
 
-                        <Transform translation="0 100 0" rotation="1 0 0 -1.57">
+                        <Transform translation="0 200 0" rotation="1 0 0 -1.57">
                             <Shape>
                                 <Appearance><Material diffuseColor="0.7 0.7 0.7"></Material></Appearance>
                                 <Plane solid="false" size="200 200"></Plane>
@@ -56,7 +63,7 @@
 
 
 
-            <group DEF='left'>
+            <group DEF='left' id="leftEye">
             <shape>
                 <appearance>
                     <renderedTexture id="rtLeft" stereoMode="LEFT_EYE" update='ALWAYS'
@@ -126,7 +133,7 @@
                 <plane solid="false"></plane>
             </shape>
         </group>
-        <group DEF='right'>
+        <group DEF='right' id="rightEye">
             <shape>
                 <appearance>
                     <renderedTexture id="rtRight" stereoMode="RIGHT_EYE" update='ALWAYS'
@@ -165,6 +172,7 @@
         </x3d>
 
 
+        <script src="js/mousetrap.min.js"></script>
         <script src="js/main.js"></script>
 
     </body>
