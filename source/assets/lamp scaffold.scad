@@ -26,4 +26,28 @@ module spine(hs = 1,c=3){
         }
 	}
 }
-scaffold(numRings = 36, D = 200, TH = 3, bandW = 1);
+module octStar(D = 200, r = 30){
+	cube(size = [r,r,D*1.5], center = true);
+	rotate([0,0,45])
+	cube(size = [r,r,D*1.5], center = true);
+}
+module circleToken(D = 200, TH = 3, bandW = 5){
+	intersection(){
+		difference() {
+			sphere(r = D/2, $fn=50);
+			sphere(r = D/2 - TH/2, $fn=50);
+		}
+		translate([0,0,-D/3])
+		difference(){
+			octStar(r = 30);
+			octStar(r = 23);
+		}
+		//difference() {
+		//	cylinder(h = D*1.5, r = 20);
+		//	cylinder(h = D*1.5, r = 15);
+		//}
+	}
+}
+//octStar();
+circleToken();
+//scaffold(numRings = 36, D = 200, TH = 3, bandW = 1);
