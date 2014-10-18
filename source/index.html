@@ -14,7 +14,7 @@
                     description='Mood Engine'
                     centerOfRotation='3.4625 1.73998 -5.55'
                     orientation='0 1 0 2.99229' position='0.0 0.0 -200'
-                    zNear="0.001" zFar="800"></viewpoint>
+                    zNear="0.001" zFar="8000"></viewpoint>
 
                 <group id='root' render="false">
                     <group DEF='theScene'>
@@ -26,9 +26,9 @@
                             on='TRUE'
                             intensity='0.9000'
                             color="1 1 1"
-                            shadowIntensity='0.5'
-                            shadowFilterSize="124"
-                            shadowCascades="2"
+                            shadowMapSize='1024'
+                            shadowIntensity='1.0'
+                            shadowFilterSize="32"
                             location="0 0 0"
                             radius='800'></PointLight>
 
@@ -60,8 +60,6 @@
                             orientation="-0.99727 0.07070 -0.02151 0.42839"></Viewpoint>
                 </group>
             </group>
-
-
 
             <group DEF='left' id="leftEye">
             <shape>
