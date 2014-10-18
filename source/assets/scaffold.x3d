@@ -6,15 +6,6 @@
 		<meta name="generator" content="Blender 2.70 (sub 0)" />
 	</head>
 	<Scene>
-		<NavigationInfo headlight="false"
-		                visibilityLimit="0.0"
-		                type='"EXAMINE", "ANY"'
-		                avatarSize="0.25, 1.75, 0.75"
-		                />
-		<Background DEF="WO_World"
-		            groundColor="0.051 0.051 0.051"
-		            skyColor="0.051 0.051 0.051"
-		            />
 		<Transform DEF="Openjscad_TRANSFORM"
 		           translation="0.000000 0.000000 0.000000"
 		           scale="1.000000 1.000000 1.000000"
