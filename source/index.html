@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>My first X3DOM page</title>
+        <title>Mood Engine</title>
         <script type="text/javascript" src="http://www.x3dom.org/download/x3dom.js"> </script>
         <link rel="stylesheet" type="text/css" href="http://www.x3dom.org/download/x3dom.css"></link>
         <link rel="stylesheet" type="text/css" href="css/main.css"/>
@@ -10,13 +10,15 @@
         <x3d style="width:100%; height:100%; border:0; margin:0; padding:0;" id="x3d">
             <scene>
 
-                <viewpoint id='vpp' DEF='vp' description='ViewPoint 1' centerOfRotation='3.4625 1.73998 -5.55'
-                   orientation='0 1 0 2.99229' position='4.17102 1.00905 -6.97228'
-                   zNear="0.001" zFar="300"></viewpoint>
+                <viewpoint id='vpp' DEF='vp'
+                    description='Mood Engine'
+                    centerOfRotation='3.4625 1.73998 -5.55'
+                    orientation='0 1 0 2.99229' position='0.0 0.0 -200'
+                    zNear="0.001" zFar="800"></viewpoint>
 
                 <group id='root' render='false'>
                     <group DEF='theScene'>
-                        <navigationInfo id="head" headlight='false' type='"EXAMINE"'></navigationInfo>
+                        <navigationInfo id="head" headlight='true' type='"EXAMINE"'></navigationInfo>
                         <background  skyColor="0 0 0"></background>
 
                         <PointLight
