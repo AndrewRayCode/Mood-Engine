@@ -172,6 +172,7 @@ loader.load( 'models/scaffold.obj', function ( nest ) {
     scene.add( nest );
 });
 
+var starCharm;
 loader.load( 'models/star.obj', function ( star ) {
     star.castShadow = true;
 
@@ -180,21 +181,48 @@ loader.load( 'models/star.obj', function ( star ) {
             child.castShadow = true;
         }
     });
-    scene.add( star );
+    starCharm = star.geometry;
 });
 
+var circleCharm;
 loader.load( 'models/circle.obj', function ( circle ) {
-    star.castShadow = true;
+    circle.castShadow = true;
 
-    star.traverse( function ( circle ) {
+    circle.traverse( function ( child ) {
         if ( child instanceof THREE.Mesh ) {
             child.castShadow = true;
         }
     });
-    scene.add( circle );
+    circleCharm = circle.geometry;
+    console.log(circle.geometry);
 });
-// Randomly populate the lamp
 
+var charms = [];
+var material = new THREE.MeshBasicMaterial();
+// Randomly populate the lamp
+for (var i = 0; i < 10; i++){
+   var xRot = Math.random()*Math.PI;
+   var yRot = Math.random()*Math.PI*2;
+   charms[i] = (new THREE.Mesh(circleCharm, material));
+   charms[i].rotation.x = xRot;
+   charms[i].rotation.y = yRot;
+
+   charms[i].geometry.computeBoundingBox();
+   var BB = charms[i].geometry.boundingBox.clone();
+   var x = (BB.min.x + BB.max.x)/2.0;
+   var y = (BB.min.y + BB.max.y)/2.0;
+   var z = (BB.min.z + BB.max.z)/2.0;
+
+   var cube = new THREE.Mesh(new THREE.CubeGeometry(BB.size.width, BB.size.height, BB.size.depth),material);
+   cube.position.x = x;
+   cube.position.y = y;
+   cube.position.z = z;
+   cube.visible = false;
+
+   charms[i].add(cube);
+
+   scene.add(charms[i]);
+}
 
 
 
