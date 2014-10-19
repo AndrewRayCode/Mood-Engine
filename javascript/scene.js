@@ -212,17 +212,11 @@ loader.load( 'models/star.obj', function ( star ) {
 
 var charms = [];
 loader.load( 'models/circle.obj', function ( circle ) {
-
-   // circle.traverse( function ( child ) {
-   //     if ( child instanceof THREE.Mesh ) {
-   //         child.castShadow = true;
-   //     }
-   // });
     
     circle.castShadow = true;
     var geometry = circle.children[0].geometry;
 
-    for (var i = 0; i < 10; i++){
+    for (var i = 0; i < 20; i++){
       var xRot = Math.random()*Math.PI;
       var zRot = Math.random()*Math.PI*2;
       var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
@@ -235,23 +229,26 @@ loader.load( 'models/circle.obj', function ( circle ) {
 
       charms[i].geometry.computeBoundingBox();
 
-      charm.castShadow = true;
-      scene.add( charm );
+      var BB = charms[i].geometry.boundingBox.clone();
+      var x = (BB.min.x + BB.max.x)/2.0;
+      var y = (BB.min.y + BB.max.y)/2.0;
+      var z = (BB.min.z + BB.max.z)/2.0;
 
-      //var BB = charms[i].geometry.boundingBox.clone();
-      //var x = (BB.min.x + BB.max.x)/2.0;
-      //var y = (BB.min.y + BB.max.y)/2.0;
-      //var z = (BB.min.z + BB.max.z)/2.0;
-      //console.log(BB.size.width); 
-      //console.log(cube);
-      //var cube = new THREE.Mesh(new THREE.CubeGeometry(BB.size.width, BB.size.height, BB.size.depth),LampMaterial);
-      //cube.position.x = x;
-      //cube.position.y = y;
-      //cube.position.z = z;
-      //cube.visible = true;
+      var width = BB.max.x - BB.min.x;
+      var height = BB.max.y - BB.min.y;
+      var depth = BB.max.z - BB.min.z;
+
+      var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth),LampMaterial);
+      console.log(cube.position.x);
+
+      cube.position.x = x;
+      cube.position.y = y;
+      cube.position.z = z;
+      cube.visible = true;
   
-      //charms[i].add(cube);
-      //scene.add( cube );
+      charms[i].add(cube);
+      nest.add(charm);
+      charm.castShadow = true;
 
     }
 });
