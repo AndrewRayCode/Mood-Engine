@@ -161,7 +161,7 @@ createLight = function() {
 };
 
 var loader = new THREE.OBJLoader();
-loader.load( 'models/lamp.obj', function ( nest ) {
+loader.load( 'models/scaffold.obj', function ( nest ) {
     nest.castShadow = true;
 
     nest.traverse( function ( child ) {
@@ -171,6 +171,31 @@ loader.load( 'models/lamp.obj', function ( nest ) {
     });
     scene.add( nest );
 });
+
+loader.load( 'models/star.obj', function ( star ) {
+    star.castShadow = true;
+
+    star.traverse( function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+            child.castShadow = true;
+        }
+    });
+    scene.add( star );
+});
+
+loader.load( 'models/circle.obj', function ( circle ) {
+    star.castShadow = true;
+
+    star.traverse( function ( circle ) {
+        if ( child instanceof THREE.Mesh ) {
+            child.castShadow = true;
+        }
+    });
+    scene.add( circle );
+});
+// Randomly populate the lamp
+
+
 
 
 render = function() {
