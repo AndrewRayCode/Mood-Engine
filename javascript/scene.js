@@ -46,71 +46,97 @@ ambient.intensity = 0.2;
 ambient.position.set( 0, 0, 0 );
 scene.add( ambient );
 
-var light = new THREE.SpotLight( 0xffffff );
-light.intensity = 0.8;
-light.position.set( 0, 0, 0 );
-light.castShadow = true;
+function createShadowCaster( direction ) {
+    var light = new THREE.SpotLight( 0xffffff );
+    light.intensity = 0.8;
+    light.position.set( 0, 0, 0 );
+    light.castShadow = true;
 
-light.angle = Math.PI / 2;
-var lightTarget = new THREE.Object3D();
+    light.angle = Math.PI / 2;
+    var lightTarget = new THREE.Object3D();
 
-lightTarget.position.set(0,0,-1);
-scene.add(lightTarget);
-light.target = lightTarget;
+    lightTarget.position = direction.clone();
+    scene.add(lightTarget);
+    light.target = lightTarget;
 
-light.shadowCameraVisible = true;
-light.shadowDarkness = 0.95;
+    //light.shadowCameraVisible = true;
+    light.shadowDarkness = 0.95;
 
-light.shadowMapWidth = 1024;
-light.shadowMapHeight = 1024;
+    light.shadowMapWidth = 512;
+    light.shadowMapHeight = 512;
 
-light.shadowCameraNear = 0.01;
-light.shadowCameraFar = 800;
-light.shadowCameraFov = 90;
-scene.add( light );
+    light.shadowCameraNear = 0.01;
+    light.shadowCameraFar = 800;
+    light.shadowCameraFov = 90;
+    scene.add( light );
+}
 
-var material = new THREE.MeshLambertMaterial({
-    color: 0xdddddd
-});
+createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
+createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
+createShadowCaster( new THREE.Vector3( 0, -1, 0 ) );
+createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
+createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
+createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
 
-var wallSize = 800,
+var wallSize = 1600,
     wallOffset = wallSize / 2;
 
+var floorMaterial = new THREE.MeshLambertMaterial({
+    color: 0xdddddd
+});
 var floorGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
-var floor = new THREE.Mesh(floorGeometry, material);
+var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.position.y = wallOffset
 floor.rotation.x = Math.PI / 2;
+floor.receiveShadow = true;
 scene.add(floor);
 
+var ceilMaterial = new THREE.MeshLambertMaterial({
+    color: 0xdddddd
+});
 var ceilingGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
-var ceiling = new THREE.Mesh(ceilingGeometry, material);
+var ceiling = new THREE.Mesh(ceilingGeometry, ceilMaterial);
 ceiling.position.y = -wallOffset;
 ceiling.rotation.x = -Math.PI / 2;
+ceiling.receiveShadow = true;
 scene.add(ceiling);
 
+var wall1Material = new THREE.MeshLambertMaterial({
+    color: 0xdddddd
+});
 var wall1Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
-var wall1 = new THREE.Mesh(wall1Geometry, material);
+var wall1 = new THREE.Mesh(wall1Geometry, wall1Material);
 wall1.position.x = -wallOffset;
 wall1.rotation.y = Math.PI / 2;
 wall1.receiveShadow = true;
 scene.add(wall1);
 
+var wall2Material = new THREE.MeshLambertMaterial({
+    color: 0xdddddd
+});
 var wall2Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
-var wall2 = new THREE.Mesh(wall2Geometry, material);
+var wall2 = new THREE.Mesh(wall2Geometry, wall2Material);
 wall2.position.x = wallOffset;
 wall2.rotation.y = -Math.PI / 2;
 wall2.receiveShadow = true;
 scene.add(wall2);
 
+var wall3Material = new THREE.MeshLambertMaterial({
+    color: 0xdddddd
+});
 var wall3Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
-var wall3 = new THREE.Mesh(wall3Geometry, material);
+var wall3 = new THREE.Mesh(wall3Geometry, wall3Material);
 wall3.position.z = wallOffset;
-wall3.rotation.z = -Math.PI / 2;
+wall3.rotation.y = Math.PI;
 wall3.receiveShadow = true;
 scene.add(wall3);
+window.wall3 = wall3;
 
+var wall4Material = new THREE.MeshLambertMaterial({
+    color: 0xdddddd
+});
 var wall4Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
-var wall4 = new THREE.Mesh(wall4Geometry, material);
+var wall4 = new THREE.Mesh(wall4Geometry, wall4Material);
 wall4.position.z = -wallOffset;
 wall4.rotation.z = -Math.PI / 2;
 wall4.receiveShadow = true;
@@ -138,7 +164,6 @@ createLight = function() {
 var loader = new THREE.OBJLoader();
 loader.load( 'models/lamp.obj', function ( nest ) {
     nest.castShadow = true;
-    nest.position.y = - 80;
 
     nest.traverse( function ( child ) {
         if ( child instanceof THREE.Mesh ) {
