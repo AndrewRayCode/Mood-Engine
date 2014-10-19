@@ -1,6 +1,8 @@
 (function() {
 
-var createLight, effect, geometry, material, onResize, render, renderer, nest, circleCharm, starCharm;
+var createLight, geometry, material, onResize, render, renderer, nest, circleCharm, starCharm, oculusControls;
+
+var time = Date.now();
 
 var cubes = window.cubes = [];
 
@@ -25,11 +27,13 @@ renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-effect = new THREE.OculusRiftEffect(renderer, {
-    worldScale: 2
-});
+oculusControls = new THREE.OculusRiftControls(camera);
+scene.add(oculusControls.getObject());
 
-effect.setSize(window.innerWidth, window.innerHeight);
+var DK2 = [1920, 1080];
+
+var vrEffect = new THREE.VREffect(renderer, function() {}),
+    vrControls = new THREE.VRControls(camera);
 
 renderer.shadowMapEnabled = true;
 renderer.setClearColor( 0x646366, 1 );
@@ -38,7 +42,7 @@ onResize = function() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    return effect.setSize(window.innerWidth, window.innerHeight);
+    //effect.setSize(window.innerWidth, window.innerHeight);
 };
 
 window.addEventListener('resize', onResize, false);
@@ -285,15 +289,35 @@ loader.load( 'models/circle.obj', function ( circle ) {
     }
 });
 
-
-
+var scale = 500;
 
 render = function() {
-    effect.render(scene, camera);
-    controls.update();
+
+
+    var vrState = vrControls.getVRState();
+
+    var cPos = oculusControls.getObject().position;
+    var vrPos = vrState.hmd.position;
+
+    var pos = vrPos;
+    pos[0] *= scale;
+    pos[1] *= scale;
+    pos[2] *= scale;
+
+    camera.position.fromArray(pos);
+    oculusControls.update(Date.now() - time, vrState);
+
+    vrControls.update();
+    vrEffect.render(scene, camera);
+
+    //oculusControls.update();
     //group.rotation.y += 0.002;
+
     flare.quaternion.copy( camera.quaternion );
-    return requestAnimationFrame(render);
+
+    time = Date.now();
+
+    requestAnimationFrame(render);
 };
 
 render();
