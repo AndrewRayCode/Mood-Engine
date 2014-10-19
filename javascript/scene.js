@@ -238,7 +238,7 @@ var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
 scene.add( flare );
 
 loader.load( 'models/lampCord.obj', function ( cord ) {
-    cord.scale.set( 16, 15.6, 16 )
+    cord.scale.set( 16, 15.9, 16 )
     cord.position.set( 0, 1050, 0 );
     scene.add( cord );
 });
