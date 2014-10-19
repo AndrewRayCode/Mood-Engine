@@ -41,14 +41,14 @@ controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 document.body.appendChild(renderer.domElement);
 
-var ambient = new THREE.PointLight( 0xddffdd );
-ambient.intensity = 0.2;
+var ambient = new THREE.PointLight( 0xffffff );
+ambient.intensity = 0.6;
 ambient.position.set( 0, 0, 0 );
 scene.add( ambient );
 
 function createShadowCaster( direction ) {
     var light = new THREE.SpotLight( 0xffffff );
-    light.intensity = 0.8;
+    light.intensity = 0.1;
     light.position.set( 0, 0, 0 );
     light.castShadow = true;
 
@@ -60,10 +60,10 @@ function createShadowCaster( direction ) {
     light.target = lightTarget;
 
     //light.shadowCameraVisible = true;
-    light.shadowDarkness = 0.95;
+    light.shadowDarkness = 0.5;
 
-    light.shadowMapWidth = 512;
-    light.shadowMapHeight = 512;
+    light.shadowMapWidth = 256;
+    light.shadowMapHeight = 256;
 
     light.shadowCameraNear = 0.01;
     light.shadowCameraFar = 800;
@@ -73,7 +73,6 @@ function createShadowCaster( direction ) {
 
 createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
 createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
-createShadowCaster( new THREE.Vector3( 0, -1, 0 ) );
 createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
@@ -82,12 +81,12 @@ var wallSize = 1600,
     wallOffset = wallSize / 2;
 
 var floorMaterial = new THREE.MeshLambertMaterial({
-    color: 0xdddddd
+    color: 0xccddaa
 });
 var floorGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.position.y = wallOffset
-floor.rotation.x = Math.PI / 2;
+floor.position.y = -wallOffset
+floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
@@ -96,8 +95,8 @@ var ceilMaterial = new THREE.MeshLambertMaterial({
 });
 var ceilingGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var ceiling = new THREE.Mesh(ceilingGeometry, ceilMaterial);
-ceiling.position.y = -wallOffset;
-ceiling.rotation.x = -Math.PI / 2;
+ceiling.position.y = wallOffset;
+ceiling.rotation.x = Math.PI / 2;
 ceiling.receiveShadow = true;
 scene.add(ceiling);
 
