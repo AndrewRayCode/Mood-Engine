@@ -84,23 +84,36 @@ var wallDepth = 4000,
 
 var floorTexture = new THREE.ImageUtils.loadTexture( 'images/wood.jpg' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.set( 2, 4 );
+//floorTexture.repeat.set( 2, 4 );
 
 var floorMaterial = new THREE.MeshBasicMaterial({
     map: floorTexture
 });
 
-var floorGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 100, 100);
+var floorGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 10, 10);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.position.y = -wallHeight / 2;
 floor.rotation.x = -Math.PI / 2;
 //floor.receiveShadow = true;
 scene.add(floor);
 
+var rugTexture = new THREE.ImageUtils.loadTexture( 'images/persain_rug.jpg' );
+
+var floorMaterial = new THREE.MeshBasicMaterial({
+    map: rugTexture
+});
+
+var rugGeometry = new THREE.PlaneGeometry(wallDepth / 3, wallDepth / 2, 1, 1);
+var rug = new THREE.Mesh(rugGeometry, floorMaterial);
+rug.position.y = ( -wallHeight / 2 ) + 1;
+rug.rotation.x = -Math.PI / 2;
+rug.receiveShadow = true;
+scene.add(rug);
+
 var ceilMaterial = new THREE.MeshLambertMaterial({
     map: THREE.ImageUtils.loadTexture( 'images/wall.jpg' )
 });
-var ceilingGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 100, 100);
+var ceilingGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 10, 10);
 var ceiling = new THREE.Mesh(ceilingGeometry, ceilMaterial);
 ceiling.position.y = wallHeight / 2;
 ceiling.rotation.x = Math.PI / 2;
@@ -114,7 +127,7 @@ wallTexture.repeat.set( 2, 4 );
 var wall1Material = new THREE.MeshLambertMaterial({
     map: wallTexture,
 });
-var wall1Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
+var wall1Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 10, 10);
 var wall1 = new THREE.Mesh(wall1Geometry, wall1Material);
 wall1.position.x = -wallDepth / 2;
 wall1.rotation.y = Math.PI / 2;
@@ -153,6 +166,16 @@ wall4.position.z = -wallDepth / 2;
 wall4.rotation.z = -Math.PI / 2;
 wall4.receiveShadow = true;
 scene.add(wall4);
+
+var outletMaterial = new THREE.MeshLambertMaterial({
+    map: THREE.ImageUtils.loadTexture( 'images/outlet.jpg' ),
+});
+var outletGeom = new THREE.PlaneGeometry(120, 200, 1, 1);
+var outlet = new THREE.Mesh(outletGeom, outletMaterial);
+outlet.position.z = ( -wallDepth / 2 ) + 2;
+outlet.position.x = ( wallDepth / 2 ) - 200;
+outlet.position.y = ( -wallHeight / 2 ) + 200;
+scene.add(outlet);
 
 walls = [ wall1, wall2, wall3, wall4 ];
 
