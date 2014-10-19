@@ -1,6 +1,6 @@
 (function() {
 
-var createLight, effect, geometry, material, onResize, render, renderer;
+var createLight, effect, geometry, material, onResize, render, renderer, nest;
 
 window.scope = {
     x: 0,
@@ -26,7 +26,7 @@ effect = new THREE.OculusRiftEffect(renderer, {
 effect.setSize(window.innerWidth, window.innerHeight);
 
 renderer.shadowMapEnabled = true;
-renderer.setClearColor( 0xff0000, 1 );
+renderer.setClearColor( 0x646366, 1 );
 
 onResize = function() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -37,12 +37,12 @@ onResize = function() {
 
 window.addEventListener('resize', onResize, false);
 
-//controls = new THREE.OrbitControls( camera, renderer.domElement );
+controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 document.body.appendChild(renderer.domElement);
 
-var ambient = new THREE.PointLight( 0xffffff );
-ambient.intensity = 0.6;
+var ambient = new THREE.PointLight( 0xfffafa );
+ambient.intensity = 0.8;
 ambient.position.set( 0, 0, 0 );
 scene.add( ambient );
 
@@ -65,8 +65,8 @@ function createShadowCaster( direction ) {
     light.shadowMapWidth = 256;
     light.shadowMapHeight = 256;
 
-    light.shadowCameraNear = 0.01;
-    light.shadowCameraFar = 800;
+    light.shadowCameraNear = 10;
+    light.shadowCameraFar = 3000;
     light.shadowCameraFov = 90;
     scene.add( light );
 }
@@ -77,12 +77,19 @@ createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
 
-var wallSize = 1600,
+createShadowCaster( new THREE.Vector3( 0, 0, 0 ) );
+
+var wallSize = 2600,
     wallOffset = wallSize / 2;
 
-var floorMaterial = new THREE.MeshLambertMaterial({
-    color: 0xccddaa
+var floorTexture = new THREE.ImageUtils.loadTexture( 'images/wood.jpg' );
+floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+floorTexture.repeat.set( 2, 4 );
+
+var floorMaterial = new THREE.MeshBasicMaterial({
+    map: floorTexture
 });
+
 var floorGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.position.y = -wallOffset
@@ -100,8 +107,12 @@ ceiling.rotation.x = Math.PI / 2;
 //ceiling.receiveShadow = true;
 scene.add(ceiling);
 
+var wallTexture = new THREE.ImageUtils.loadTexture( 'images/walls.jpg' );
+wallTexture.wrapS = wallTexture.wrapT = THREE.RepeatWrapping;
+wallTexture.repeat.set( 2, 4 );
+
 var wall1Material = new THREE.MeshLambertMaterial({
-    color: 0xdddddd
+    map: wallTexture,
 });
 var wall1Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var wall1 = new THREE.Mesh(wall1Geometry, wall1Material);
@@ -111,7 +122,7 @@ wall1.receiveShadow = true;
 scene.add(wall1);
 
 var wall2Material = new THREE.MeshLambertMaterial({
-    color: 0xdddddd
+    map: wallTexture,
 });
 var wall2Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var wall2 = new THREE.Mesh(wall2Geometry, wall2Material);
@@ -121,7 +132,7 @@ wall2.receiveShadow = true;
 scene.add(wall2);
 
 var wall3Material = new THREE.MeshLambertMaterial({
-    color: 0xdddddd
+    map: wallTexture,
 });
 var wall3Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var wall3 = new THREE.Mesh(wall3Geometry, wall3Material);
@@ -129,10 +140,9 @@ wall3.position.z = wallOffset;
 wall3.rotation.y = Math.PI;
 wall3.receiveShadow = true;
 scene.add(wall3);
-window.wall3 = wall3;
 
 var wall4Material = new THREE.MeshLambertMaterial({
-    color: 0xdddddd
+    map: wallTexture,
 });
 var wall4Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var wall4 = new THREE.Mesh(wall4Geometry, wall4Material);
@@ -141,7 +151,9 @@ wall4.rotation.z = -Math.PI / 2;
 wall4.receiveShadow = true;
 scene.add(wall4);
 
-camera.position.fromArray([0, 160, 200]);
+walls = [ wall1, wall2, wall3, wall4 ];
+
+camera.position.fromArray([0, 160, 800]);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
@@ -161,7 +173,8 @@ createLight = function() {
 };
 
 var loader = new THREE.OBJLoader();
-loader.load( 'models/scaffold.obj', function ( nest ) {
+loader.load( 'models/scaffold.obj', function ( _nest ) {
+    nest = _nest;
     nest.castShadow = true;
 
     nest.traverse( function ( child ) {
@@ -171,6 +184,15 @@ loader.load( 'models/scaffold.obj', function ( nest ) {
     });
     scene.add( nest );
 });
+
+var flareGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
+var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    opacity: 0.7,
+    map: new THREE.ImageUtils.loadTexture('images/flare.png')
+}));
+scene.add( flare );
 
 var starCharm;
 loader.load( 'models/star.obj', function ( star ) {
@@ -228,7 +250,9 @@ for (var i = 0; i < 10; i++){
 
 render = function() {
     effect.render(scene, camera);
-    //controls.update();
+    controls.update();
+    nest && ( nest.rotation.y += 0.002 );
+    flare.quaternion.copy( camera.quaternion );
     return requestAnimationFrame(render);
 };
 

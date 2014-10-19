@@ -10,7 +10,7 @@ window.controller = controller = new Leap.Controller({
 
 controller.use('transform', {
     quaternion: (new THREE.Quaternion).setFromEuler(new THREE.Euler(Math.PI * -0.3, 0, Math.PI, 'ZXY')),
-    position: new THREE.Vector3(0, 100, 0)
+    position: new THREE.Vector3(0, 100, 100)
 });
 
 controller.use('riggedHand', {
@@ -25,6 +25,11 @@ controller.use('riggedHand', {
             lightness: 0.8
         };
     }
+});
+
+controller.on('riggedHand.meshAdded', function(handMesh, leapHand) {
+    handMesh.castShadow = false;
+    handMesh.receiveShadow = false;
 });
 
 controller.connect();
@@ -55,34 +60,57 @@ releaseLight = function(hand) {
     return hand.data('lightVisualizer', null);
 };
 
-  positionLight = function(hand) {
+var surfacePoint = window.surfacePoint = new THREE.Mesh(
+    new THREE.SphereGeometry(10),
+    new THREE.MeshBasicMaterial(0xff0000)
+);
+//scene.add(surfacePoint);
+
+function pinch( hand ) {
+    var handMesh = hand.data('riggedHand.mesh');
+
+    var pos = Leap.vec3.clone(hand.palmPosition);
+    offsetDown = Leap.vec3.clone(hand.palmNormal);
+    Leap.vec3.multiply(offsetDown, offsetDown, [50, 50, 50]);
+    Leap.vec3.add(pos, pos, offsetDown);
+    offsetForward = Leap.vec3.clone(hand.direction);
+    Leap.vec3.multiply(offsetForward, offsetForward, [30, 30, 30]);
+    Leap.vec3.add(pos, pos, offsetForward);
+
+    var pinchPosition = handMesh.position.clone().add(
+        new THREE.Vector3( pos[0], pos[1], pos[2] )
+    );
+
+    var ray = new THREE.Raycaster( camera.position, pinchPosition.sub( camera.position ).normalize() );
+    var intersects = ray.intersectObjects( walls );
+
+    // if there is one (or more) intersections
+    if ( intersects.length > 0 ) {
+        surfacePoint.position = intersects[0].point.normalize().multiplyScalar( 100 );
+    }
+}
+
+var releasePinch = _.debounce( function( hand ) {
+    surfacePoint.position = new THREE.Vector3( 0, 0, 0 );
+}, 500 );
+
+positionHand = function(hand) {
     var handMesh, light, offsetDown, offsetForward, pos;
     handMesh = hand.data('riggedHand.mesh');
+
     if (hand.pinchStrength > 0.5) {
-      if (!hand.data('pinching')) {
-        makeLight(hand);
-        hand.data('pinching', true);
-      }
-      if (light = hand.data('light')) {
-        pos = Leap.vec3.clone(hand.palmPosition);
-        offsetDown = Leap.vec3.clone(hand.palmNormal);
-        Leap.vec3.multiply(offsetDown, offsetDown, [50, 50, 50]);
-        Leap.vec3.add(pos, pos, offsetDown);
-        offsetForward = Leap.vec3.clone(hand.direction);
-        Leap.vec3.multiply(offsetForward, offsetForward, [30, 30, 30]);
-        Leap.vec3.add(pos, pos, offsetForward);
-        return handMesh.scenePosition(pos, light.position);
-      }
-    } else {
-      if (hand.data('pinching')) {
-        releaseLight(hand);
-        return hand.data('pinching', false);
-      }
+        if (!hand.data('pinching')) {
+            hand.data('pinching', true);
+            pinch( hand );
+        } else if (hand.data('pinching')) {
+            releasePinch( hand );
+            hand.data('pinching', false);
+        }
     }
-  };
+};
 
-  controller.on('handLost', releaseLight);
+  controller.on('handLost', releasePinch);
 
-  controller.on('hand', positionLight);
+controller.on('hand', positionHand);
 
 }).call(this);
