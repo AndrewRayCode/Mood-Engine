@@ -36,7 +36,34 @@ onResize = function() {
 
 window.addEventListener('resize', onResize, false);
 
+controls = new THREE.OrbitControls( camera, renderer.domElement );
+
 document.body.appendChild(renderer.domElement);
+
+var light = new THREE.PointLight( 0xffffff, 1, 1000 );
+light.position.set( 0, 0, 0 );
+scene.add( light );
+
+var material = new THREE.MeshPhongMaterial({
+    ambient: 0x030303,
+    color: 0xdddddd,
+    specular: 0x009900,
+    shininess: 30,
+    shading: THREE.FlatShading
+});
+
+var floorGeometry = new THREE.PlaneGeometry(800, 800, 1, 1);
+var floor = new THREE.Mesh(floorGeometry, material);
+floor.position.z = 400;
+//floor.rotation.x = Math.PI / 2;
+scene.add(floor);
+
+//var ceilingGeometry = new THREE.PlaneGeometry(800, 800, 1, 1);
+//var ceiling = new THREE.Mesh(ceilingGeometry);
+//ceiling.rotation.z = Math.PI;
+//ceiling.position.y = 400;
+//floor.rotation.x = -Math.PI / 2;
+//scene.add(ceiling);
 
 geometry = new THREE.CubeGeometry(75, 75, 16);
 
@@ -109,6 +136,7 @@ render = function() {
     cube2.rotation.x += scope.rate * 0.004;
     cube2.rotation.y += scope.rate * 0.002;
     effect.render(scene, camera);
+    controls.update();
     return requestAnimationFrame(render);
 };
 
