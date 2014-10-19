@@ -2,6 +2,10 @@
 
 var createLight, effect, geometry, material, onResize, render, renderer, nest, circleCharm, starCharm;
 
+var cubes = window.cubes = [];
+
+var group = new THREE.Object3D();
+
 var LampMaterial = new THREE.MeshBasicMaterial();
 
 window.scope = {
@@ -13,7 +17,7 @@ window.scope = {
 
 window.scene = new THREE.Scene();
 
-window.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+window.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 10000);
 
 renderer = new THREE.WebGLRenderer({
     antialias: true
@@ -47,6 +51,8 @@ var ambient = new THREE.PointLight( 0xfffafa );
 ambient.intensity = 0.8;
 ambient.position.set( 0, 0, 0 );
 scene.add( ambient );
+
+scene.add( group );
 
 function createShadowCaster( direction ) {
     var light = new THREE.SpotLight( 0xffffff );
@@ -210,7 +216,7 @@ loader.load( 'models/scaffold.obj', function ( _nest ) {
             child.castShadow = true;
         }
     });
-    scene.add( nest );
+    group.add( nest );
 });
 
 var flareGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
@@ -240,8 +246,8 @@ loader.load( 'models/circle.obj', function ( circle ) {
     var geometry = circle.children[0].geometry;
 
     for (var i = 0; i < 20; i++){
-      var xRot = Math.random()*Math.PI;
-      var zRot = Math.random()*Math.PI*2;
+      var xRot = randFloat( -Math.PI / 2, Math.PI / 2 );
+      var zRot = Math.random() * Math.PI * 2;
       var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
 
       charm.rotation.order = "ZXY";
@@ -261,16 +267,18 @@ loader.load( 'models/circle.obj', function ( circle ) {
       var height = BB.max.y - BB.min.y;
       var depth = BB.max.z - BB.min.z;
 
-      var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth),LampMaterial);
-      console.log(cube.position.x);
+      var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth));
 
       cube.position.x = x;
       cube.position.y = y;
       cube.position.z = z;
-      cube.visible = true;
+      cube.visible = false;
   
       charms[i].add(cube);
-      nest.add(charm);
+      cube.name = 'cube' + i;
+      charms[i].name = 'charm' + i;
+      group.add( charm );
+      cubes.push( cube );
       charm.castShadow = true;
 
     }
@@ -282,11 +290,15 @@ loader.load( 'models/circle.obj', function ( circle ) {
 render = function() {
     effect.render(scene, camera);
     controls.update();
-    nest && ( nest.rotation.y += 0.002 );
+    group.rotation.y += 0.002;
     flare.quaternion.copy( camera.quaternion );
     return requestAnimationFrame(render);
 };
 
 render();
+
+function randFloat(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
 }).call(this);
