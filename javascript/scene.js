@@ -179,7 +179,7 @@ scene.add(outlet);
 
 walls = [ wall1, wall2, wall3, wall4 ];
 
-camera.position.fromArray([0, 160, 800]);
+camera.position.fromArray([180, -60, 1200]);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
