@@ -118,12 +118,11 @@ function pinch( hand ) {
 
         var quaternion = new THREE.Quaternion();
         quaternion.setFromUnitVectors(
-            charmVectorOld,
+            new THREE.Vector3(0, 1, 0),
             charmVectorNew
         );
 
-        charm.useQuaternion = true;
-        charm.quaternion.multiply( quaternion );
+        charm.quaternion.copy( quaternion );
 
         oldRotation = charmVectorNew.clone();
     }

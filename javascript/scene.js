@@ -250,7 +250,8 @@ loader.load( 'models/circle.obj', function ( circle ) {
       var zRot = Math.random() * Math.PI * 2;
       var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
 
-      charm.rotation.order = "ZXY";
+      //charm.rotation.order = "ZXY";
+      //charm.up = new THREE.Vector3(0, 1, 0);
       charm.rotation.x = xRot;
       charm.rotation.z = zRot;
 
@@ -290,7 +291,7 @@ loader.load( 'models/circle.obj', function ( circle ) {
 render = function() {
     effect.render(scene, camera);
     controls.update();
-    group.rotation.y += 0.002;
+    //group.rotation.y += 0.002;
     flare.quaternion.copy( camera.quaternion );
     return requestAnimationFrame(render);
 };
