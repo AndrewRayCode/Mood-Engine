@@ -37,7 +37,7 @@ onResize = function() {
 
 window.addEventListener('resize', onResize, false);
 
-controls = new THREE.OrbitControls( camera, renderer.domElement );
+//controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 document.body.appendChild(renderer.domElement);
 
@@ -87,7 +87,7 @@ var floorGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.position.y = -wallOffset
 floor.rotation.x = -Math.PI / 2;
-floor.receiveShadow = true;
+//floor.receiveShadow = true;
 scene.add(floor);
 
 var ceilMaterial = new THREE.MeshLambertMaterial({
@@ -97,7 +97,7 @@ var ceilingGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var ceiling = new THREE.Mesh(ceilingGeometry, ceilMaterial);
 ceiling.position.y = wallOffset;
 ceiling.rotation.x = Math.PI / 2;
-ceiling.receiveShadow = true;
+//ceiling.receiveShadow = true;
 scene.add(ceiling);
 
 var wall1Material = new THREE.MeshLambertMaterial({
@@ -175,7 +175,7 @@ loader.load( 'models/lamp.obj', function ( nest ) {
 
 render = function() {
     effect.render(scene, camera);
-    controls.update();
+    //controls.update();
     return requestAnimationFrame(render);
 };
 
