@@ -88,9 +88,10 @@ function createShadowCaster( direction ) {
 }
 
 createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
-//createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
+// no back wall casting
+//createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
 
 // ceiling
 createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
@@ -194,7 +195,7 @@ scene.add(outlet);
 
 walls = [ wall1, wall2, wall3, frontWall ];
 
-camera.position.fromArray([180, -60, 1200]);
+camera.position.set(180, -60, 1200);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
@@ -223,6 +224,7 @@ loader.load( 'models/scaffold.obj', function ( _nest ) {
             child.castShadow = true;
         }
     });
+    nest.material = new THREE.MeshBasicMaterial();
     group.add( nest );
 });
 
@@ -236,13 +238,13 @@ var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
 scene.add( flare );
 
 loader.load( 'models/lampCord.obj', function ( cord ) {
-    cord.scale.set( 16, 16, 16 )
+    cord.scale.set( 16, 15.6, 16 )
     cord.position.set( 0, 1050, 0 );
     scene.add( cord );
 });
 
 var starCharm,
-    defaultVariation = 0.6;
+    defaultVariation = 0.5;
 loader.load( 'models/star.obj', function ( star ) {
     
     star.castShadow = true;
@@ -262,8 +264,13 @@ loader.load( 'models/star.obj', function ( star ) {
                 defaultVariation
             );
         }
-        
-        var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
+
+        var charm = new THREE.Mesh(
+            geometry,
+            new THREE.MeshLambertMaterial({
+                color: 0x111111
+            })
+        );
 
         //charm.rotation.order = "ZXY";
         //charm.up = new THREE.Vector3(0, 1, 0);
@@ -308,7 +315,13 @@ loader.load( 'models/circle.obj', function ( circle ) {
     for (var i = 0; i < 10; i++){
         var xRot = randFloat( -Math.PI / 2, Math.PI / 2 );
         var zRot = Math.random() * Math.PI * 2;
-        var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
+
+        var charm = new THREE.Mesh(
+            geometry,
+            new THREE.MeshLambertMaterial({
+                color: 0x111111
+            })
+        );
 
         if( i > 6 ) {
             xRot = randFloat(
@@ -387,6 +400,19 @@ render = function() {
 };
 
 render();
+
+var toggled = false;
+Mousetrap.bind('space', function() {
+    if( toggled ) {
+        camera.position.set( 0, 0, 150 );
+        group.rotation.y = Math.PI;
+    } else {
+        camera.position.set(180, -60, 1200);
+        group.rotation.y = 0;
+    }
+    camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+    toggled = !toggled;
+});
 
 function randFloat(min, max) {
     return Math.random() * (max - min) + min;
