@@ -1,6 +1,8 @@
 (function() {
 
-var createLight, effect, geometry, material, onResize, render, renderer, nest;
+var createLight, effect, geometry, material, onResize, render, renderer, nest, circleCharm, starCharm;
+
+var LampMaterial = new THREE.MeshBasicMaterial();
 
 window.scope = {
     x: 0,
@@ -206,48 +208,54 @@ loader.load( 'models/star.obj', function ( star ) {
             child.castShadow = true;
         }
     });
-    starCharm = star.geometry;
-});
-
-var circleCharm;
-loader.load( 'models/circle.obj', function ( circle ) {
-    circle.castShadow = true;
-
-    circle.traverse( function ( child ) {
-        if ( child instanceof THREE.Mesh ) {
-            child.castShadow = true;
-        }
-    });
-    circleCharm = circle.geometry;
-    console.log(circle.geometry);
 });
 
 var charms = [];
-var material = new THREE.MeshBasicMaterial();
-// Randomly populate the lamp
-for (var i = 0; i < 10; i++){
-   var xRot = Math.random()*Math.PI;
-   var yRot = Math.random()*Math.PI*2;
-   charms[i] = (new THREE.Mesh(circleCharm, material));
-   charms[i].rotation.x = xRot;
-   charms[i].rotation.y = yRot;
+loader.load( 'models/circle.obj', function ( circle ) {
 
-   charms[i].geometry.computeBoundingBox();
-   var BB = charms[i].geometry.boundingBox.clone();
-   var x = (BB.min.x + BB.max.x)/2.0;
-   var y = (BB.min.y + BB.max.y)/2.0;
-   var z = (BB.min.z + BB.max.z)/2.0;
+   // circle.traverse( function ( child ) {
+   //     if ( child instanceof THREE.Mesh ) {
+   //         child.castShadow = true;
+   //     }
+   // });
+    
+    circle.castShadow = true;
+    var geometry = circle.children[0].geometry;
 
-   var cube = new THREE.Mesh(new THREE.CubeGeometry(BB.size.width, BB.size.height, BB.size.depth),material);
-   cube.position.x = x;
-   cube.position.y = y;
-   cube.position.z = z;
-   cube.visible = false;
+    for (var i = 0; i < 10; i++){
+      var xRot = Math.random()*Math.PI;
+      var zRot = Math.random()*Math.PI*2;
+      var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
 
-   charms[i].add(cube);
+      charm.rotation.order = "ZXY";
+      charm.rotation.x = xRot;
+      charm.rotation.z = zRot;
 
-   scene.add(charms[i]);
-}
+      charms[i] = charm;
+
+      charms[i].geometry.computeBoundingBox();
+
+      charm.castShadow = true;
+      scene.add( charm );
+
+      //var BB = charms[i].geometry.boundingBox.clone();
+      //var x = (BB.min.x + BB.max.x)/2.0;
+      //var y = (BB.min.y + BB.max.y)/2.0;
+      //var z = (BB.min.z + BB.max.z)/2.0;
+      //console.log(BB.size.width); 
+      //console.log(cube);
+      //var cube = new THREE.Mesh(new THREE.CubeGeometry(BB.size.width, BB.size.height, BB.size.depth),LampMaterial);
+      //cube.position.x = x;
+      //cube.position.y = y;
+      //cube.position.z = z;
+      //cube.visible = true;
+  
+      //charms[i].add(cube);
+      //scene.add( cube );
+
+    }
+});
+
 
 
 
