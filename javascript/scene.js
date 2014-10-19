@@ -30,10 +30,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 oculusControls = new THREE.OculusRiftControls(camera);
 scene.add(oculusControls.getObject());
 
-var DK2 = [1920, 1080];
+window.camera = camera;
+window.scene = scene;
+window.renderer = renderer;
 
-var vrEffect = new THREE.VREffect(renderer, function() {}),
-    vrControls = new THREE.VRControls(camera);
+var vrEffect = new THREE.VREffect(renderer, function( error ) {
+    console.error( error );
+});
+window.vrControls = vrControls = new THREE.VRControls(camera);
 
 renderer.shadowMapEnabled = true;
 renderer.setClearColor( 0x646366, 1 );
@@ -96,7 +100,6 @@ var wallDepth = 4000,
 
 var floorTexture = new THREE.ImageUtils.loadTexture( 'images/wood.jpg' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
-//floorTexture.repeat.set( 2, 4 );
 
 var floorMaterial = new THREE.MeshBasicMaterial({
     map: floorTexture
@@ -106,7 +109,6 @@ var floorGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 10, 10);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.position.y = -wallHeight / 2;
 floor.rotation.x = -Math.PI / 2;
-//floor.receiveShadow = true;
 scene.add(floor);
 
 var rugTexture = new THREE.ImageUtils.loadTexture( 'images/persain_rug.jpg' );
@@ -117,9 +119,8 @@ var floorMaterial = new THREE.MeshBasicMaterial({
 
 var rugGeometry = new THREE.PlaneGeometry(wallDepth / 3, wallDepth / 2, 1, 1);
 var rug = new THREE.Mesh(rugGeometry, floorMaterial);
-rug.position.y = ( -wallHeight / 2 ) + 1;
+rug.position.y = ( -wallHeight / 2 ) + 100;
 rug.rotation.x = -Math.PI / 2;
-rug.receiveShadow = true;
 scene.add(rug);
 
 var ceilMaterial = new THREE.MeshLambertMaterial({
@@ -184,7 +185,7 @@ var outletMaterial = new THREE.MeshLambertMaterial({
 });
 var outletGeom = new THREE.PlaneGeometry(120, 200, 1, 1);
 var outlet = new THREE.Mesh(outletGeom, outletMaterial);
-outlet.position.z = ( -wallDepth / 2 ) + 2;
+outlet.position.z = ( -wallDepth / 2 ) + 100;
 outlet.position.x = ( wallDepth / 2 ) - 200;
 outlet.position.y = ( -wallHeight / 2 ) + 200;
 scene.add(outlet);
@@ -289,31 +290,33 @@ loader.load( 'models/circle.obj', function ( circle ) {
     }
 });
 
-var scale = 500;
+var scale = 50;
 
 render = function() {
 
-
     var vrState = vrControls.getVRState();
 
-    var cPos = oculusControls.getObject().position;
-    var vrPos = vrState.hmd.position;
+    if( vrState && vrState.hmd ) {
 
-    var pos = vrPos;
-    pos[0] *= scale;
-    pos[1] *= scale;
-    pos[2] *= scale;
+        //var cPos = oculusControls.getObject().position;
+        var vrPos = vrState.hmd.position;
 
-    camera.position.fromArray(pos);
-    oculusControls.update(Date.now() - time, vrState);
+        var pos = vrPos;
+        pos[0] *= scale;
+        pos[1] *= scale;
+        pos[2] *= scale;
 
-    vrControls.update();
-    vrEffect.render(scene, camera);
+        //camera.position.fromArray(pos);
+        oculusControls.update(Date.now() - time, vrState);
 
-    //oculusControls.update();
-    //group.rotation.y += 0.002;
+        vrControls.update();
+        vrEffect.render(scene, camera);
 
-    flare.quaternion.copy( camera.quaternion );
+        //oculusControls.update();
+        //group.rotation.y += 0.002;
+
+        flare.quaternion.copy( camera.quaternion );
+    }
 
     time = Date.now();
 
