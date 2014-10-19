@@ -78,8 +78,8 @@ function createShadowCaster( direction ) {
     //light.shadowCameraVisible = true;
     light.shadowDarkness = 0.5;
 
-    light.shadowMapWidth = 256;
-    light.shadowMapHeight = 256;
+    light.shadowMapWidth = 128;
+    light.shadowMapHeight = 128;
 
     light.shadowCameraNear = 10;
     light.shadowCameraFar = 3000;
@@ -88,17 +88,18 @@ function createShadowCaster( direction ) {
 }
 
 createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
-createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
+//createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
 
-// floor
+// ceiling
 createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
+createShadowCaster( new THREE.Vector3( 0, -1, 0 ) );
 
 var wallDepth = 4000,
     wallHeight = 2200;
 
-var floorTexture = new THREE.ImageUtils.loadTexture( 'images/wood.jpg' );
+var floorTexture = new THREE.ImageUtils.loadTexture( 'images/rugfloor.jpg' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
 
 var floorMaterial = new THREE.MeshBasicMaterial({
@@ -109,19 +110,20 @@ var floorGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 10, 10);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.position.y = -wallHeight / 2;
 floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
 scene.add(floor);
 
-var rugTexture = new THREE.ImageUtils.loadTexture( 'images/persain_rug.jpg' );
+//var rugTexture = new THREE.ImageUtils.loadTexture( 'images/persain_rug.jpg' );
 
-var floorMaterial = new THREE.MeshBasicMaterial({
-    map: rugTexture
-});
+//var floorMaterial = new THREE.MeshBasicMaterial({
+    //map: rugTexture
+//});
 
-var rugGeometry = new THREE.PlaneGeometry(wallDepth / 3, wallDepth / 2, 1, 1);
-var rug = new THREE.Mesh(rugGeometry, floorMaterial);
-rug.position.y = ( -wallHeight / 2 ) + 100;
-rug.rotation.x = -Math.PI / 2;
-scene.add(rug);
+//var rugGeometry = new THREE.PlaneGeometry(wallDepth / 3, wallDepth / 2, 1, 1);
+//var rug = new THREE.Mesh(rugGeometry, floorMaterial);
+//rug.position.y = ( -wallHeight / 2 ) + 100;
+//rug.rotation.x = -Math.PI / 2;
+//scene.add(rug);
 
 var ceilMaterial = new THREE.MeshLambertMaterial({
     map: THREE.ImageUtils.loadTexture( 'images/wall.jpg' )
@@ -174,23 +176,23 @@ var wall4Material = new THREE.MeshLambertMaterial({
     map: wallTexture,
 });
 var wall4Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
-var wall4 = new THREE.Mesh(wall4Geometry, wall4Material);
-wall4.position.z = -wallDepth / 2;
-wall4.rotation.z = -Math.PI / 2;
-wall4.receiveShadow = true;
-scene.add(wall4);
+var frontWall = new THREE.Mesh(wall4Geometry, wall4Material);
+frontWall.position.z = -wallDepth / 2;
+frontWall.rotation.z = -Math.PI / 2;
+frontWall.receiveShadow = true;
+scene.add(frontWall);
 
 var outletMaterial = new THREE.MeshLambertMaterial({
     map: THREE.ImageUtils.loadTexture( 'images/outlet.jpg' ),
 });
 var outletGeom = new THREE.PlaneGeometry(120, 200, 1, 1);
 var outlet = new THREE.Mesh(outletGeom, outletMaterial);
-outlet.position.z = ( -wallDepth / 2 ) + 100;
+outlet.position.z = ( -wallDepth / 2 ) + 200;
 outlet.position.x = ( wallDepth / 2 ) - 200;
 outlet.position.y = ( -wallHeight / 2 ) + 200;
 scene.add(outlet);
 
-walls = [ wall1, wall2, wall3, wall4 ];
+walls = [ wall1, wall2, wall3, frontWall ];
 
 camera.position.fromArray([180, -60, 1200]);
 
@@ -233,59 +235,120 @@ var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
 }));
 scene.add( flare );
 
-var starCharm;
-loader.load( 'models/star.obj', function ( star ) {
-    star.castShadow = true;
-
-    star.traverse( function ( child ) {
-        if ( child instanceof THREE.Mesh ) {
-            child.castShadow = true;
-        }
-    });
+loader.load( 'models/lampCord.obj', function ( cord ) {
+    cord.scale.set( 16, 16, 16 )
+    cord.position.set( 0, 1050, 0 );
+    scene.add( cord );
 });
 
-var charms = [];
+var starCharm,
+    defaultVariation = 0.6;
+loader.load( 'models/star.obj', function ( star ) {
+    
+    star.castShadow = true;
+    var geometry = star.children[0].geometry;
+
+    for (var i = 0; i < 10; i++){
+        var xRot = randFloat( -Math.PI / 2, Math.PI / 2 );
+        var zRot = Math.random() * Math.PI * 2;
+
+        if( i > 6 ) {
+            xRot = randFloat(
+                ( -Math.PI / 2 ) - defaultVariation,
+                ( -Math.PI / 2 ) + defaultVariation
+            );
+            zRot = randFloat(
+                -defaultVariation,
+                defaultVariation
+            );
+        }
+        
+        var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
+
+        //charm.rotation.order = "ZXY";
+        //charm.up = new THREE.Vector3(0, 1, 0);
+        charm.rotation.x = xRot;
+        charm.rotation.z = zRot;
+
+        charms.push( charm );
+
+        charm.geometry.computeBoundingBox();
+
+        var BB = charm.geometry.boundingBox.clone();
+        var x = (BB.min.x + BB.max.x)/2.0;
+        var y = (BB.min.y + BB.max.y)/2.0;
+        var z = (BB.min.z + BB.max.z)/2.0;
+
+        var width = BB.max.x - BB.min.x;
+        var height = BB.max.y - BB.min.y;
+        var depth = BB.max.z - BB.min.z;
+
+        var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth));
+
+        cube.position.x = x;
+        cube.position.y = y;
+        cube.position.z = z;
+        cube.visible = false;
+    
+        charm.add(cube);
+        group.add( charm );
+        cubes.push( cube );
+        charm.castShadow = true;
+
+    }
+});
+
+var charms = window.charms = [];
+
 loader.load( 'models/circle.obj', function ( circle ) {
     
     circle.castShadow = true;
     var geometry = circle.children[0].geometry;
 
-    for (var i = 0; i < 20; i++){
-      var xRot = randFloat( -Math.PI / 2, Math.PI / 2 );
-      var zRot = Math.random() * Math.PI * 2;
-      var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
+    for (var i = 0; i < 10; i++){
+        var xRot = randFloat( -Math.PI / 2, Math.PI / 2 );
+        var zRot = Math.random() * Math.PI * 2;
+        var charm = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
 
-      //charm.rotation.order = "ZXY";
-      //charm.up = new THREE.Vector3(0, 1, 0);
-      charm.rotation.x = xRot;
-      charm.rotation.z = zRot;
+        if( i > 6 ) {
+            xRot = randFloat(
+                ( -Math.PI / 2 ) - defaultVariation,
+                ( -Math.PI / 2 ) + defaultVariation
+            );
+            zRot = randFloat(
+                -defaultVariation,
+                defaultVariation
+            );
+        }
+        charm.rotation.x = xRot;
+        charm.rotation.z = zRot;
 
-      charms[i] = charm;
+        charms.push( charm );
 
-      charms[i].geometry.computeBoundingBox();
+        charm.geometry.computeBoundingBox();
 
-      var BB = charms[i].geometry.boundingBox.clone();
-      var x = (BB.min.x + BB.max.x)/2.0;
-      var y = (BB.min.y + BB.max.y)/2.0;
-      var z = (BB.min.z + BB.max.z)/2.0;
+        var BB = charm.geometry.boundingBox.clone();
+        var x = (BB.min.x + BB.max.x)/2.0;
+        var y = (BB.min.y + BB.max.y)/2.0;
+        var z = (BB.min.z + BB.max.z)/2.0;
 
-      var width = BB.max.x - BB.min.x;
-      var height = BB.max.y - BB.min.y;
-      var depth = BB.max.z - BB.min.z;
+        var width = BB.max.x - BB.min.x;
+        var height = BB.max.y - BB.min.y;
+        var depth = BB.max.z - BB.min.z;
 
-      var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth));
+        var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth));
 
-      cube.position.x = x;
-      cube.position.y = y;
-      cube.position.z = z;
-      cube.visible = false;
-  
-      charms[i].add(cube);
-      cube.name = 'cube' + i;
-      charms[i].name = 'charm' + i;
-      group.add( charm );
-      cubes.push( cube );
-      charm.castShadow = true;
+        cube.position.x = x;
+        cube.position.y = y;
+        cube.position.z = z;
+        cube.visible = false;
+    
+        charm.add(cube);
+        cube.name = 'circle_cube' + i;
+        charm.name = 'circle_charm' + i;
+        group.add( charm );
+        cubes.push( cube );
+        charm.castShadow = true;
 
     }
 });
