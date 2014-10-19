@@ -73,14 +73,14 @@ function createShadowCaster( direction ) {
 
 createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
 createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
-createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
 
-createShadowCaster( new THREE.Vector3( 0, 0, 0 ) );
+// floor
+createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
 
-var wallSize = 2600,
-    wallOffset = wallSize / 2;
+var wallDepth = 4000,
+    wallHeight = 2200;
 
 var floorTexture = new THREE.ImageUtils.loadTexture( 'images/wood.jpg' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
@@ -90,21 +90,21 @@ var floorMaterial = new THREE.MeshBasicMaterial({
     map: floorTexture
 });
 
-var floorGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var floorGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 100, 100);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.position.y = -wallOffset
+floor.position.y = -wallHeight / 2;
 floor.rotation.x = -Math.PI / 2;
 //floor.receiveShadow = true;
 scene.add(floor);
 
 var ceilMaterial = new THREE.MeshLambertMaterial({
-    color: 0xdddddd
+    map: THREE.ImageUtils.loadTexture( 'images/wall.jpg' )
 });
-var ceilingGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var ceilingGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 100, 100);
 var ceiling = new THREE.Mesh(ceilingGeometry, ceilMaterial);
-ceiling.position.y = wallOffset;
+ceiling.position.y = wallHeight / 2;
 ceiling.rotation.x = Math.PI / 2;
-//ceiling.receiveShadow = true;
+ceiling.receiveShadow = true;
 scene.add(ceiling);
 
 var wallTexture = new THREE.ImageUtils.loadTexture( 'images/walls.jpg' );
@@ -114,39 +114,42 @@ wallTexture.repeat.set( 2, 4 );
 var wall1Material = new THREE.MeshLambertMaterial({
     map: wallTexture,
 });
-var wall1Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall1Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
 var wall1 = new THREE.Mesh(wall1Geometry, wall1Material);
-wall1.position.x = -wallOffset;
+wall1.position.x = -wallDepth / 2;
 wall1.rotation.y = Math.PI / 2;
+wall1.rotation.z = Math.PI / 2;
 wall1.receiveShadow = true;
 scene.add(wall1);
 
 var wall2Material = new THREE.MeshLambertMaterial({
     map: wallTexture,
 });
-var wall2Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall2Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
 var wall2 = new THREE.Mesh(wall2Geometry, wall2Material);
-wall2.position.x = wallOffset;
+wall2.position.x = wallDepth / 2;
 wall2.rotation.y = -Math.PI / 2;
+wall2.rotation.z = -Math.PI / 2;
 wall2.receiveShadow = true;
 scene.add(wall2);
 
 var wall3Material = new THREE.MeshLambertMaterial({
     map: wallTexture,
 });
-var wall3Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall3Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
 var wall3 = new THREE.Mesh(wall3Geometry, wall3Material);
-wall3.position.z = wallOffset;
+wall3.position.z = wallDepth / 2;
 wall3.rotation.y = Math.PI;
+wall3.rotation.z = Math.PI / 2
 wall3.receiveShadow = true;
 scene.add(wall3);
 
 var wall4Material = new THREE.MeshLambertMaterial({
     map: wallTexture,
 });
-var wall4Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall4Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
 var wall4 = new THREE.Mesh(wall4Geometry, wall4Material);
-wall4.position.z = -wallOffset;
+wall4.position.z = -wallDepth / 2;
 wall4.rotation.z = -Math.PI / 2;
 wall4.receiveShadow = true;
 scene.add(wall4);
