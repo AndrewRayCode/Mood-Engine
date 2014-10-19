@@ -1,6 +1,6 @@
 (function() {
 
-var createLight, cube, cube2, effect, geometry, material, onResize, render, renderer;
+var createLight, effect, geometry, material, onResize, render, renderer;
 
 window.scope = {
     x: 0,
@@ -26,6 +26,7 @@ effect = new THREE.OculusRiftEffect(renderer, {
 effect.setSize(window.innerWidth, window.innerHeight);
 
 renderer.shadowMapEnabled = true;
+renderer.setClearColor( 0xff0000, 1 );
 
 onResize = function() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -40,60 +41,80 @@ controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 document.body.appendChild(renderer.domElement);
 
-var light = new THREE.PointLight( 0xffffff, 1, 1000 );
+var ambient = new THREE.PointLight( 0xddffdd );
+ambient.intensity = 0.2;
+ambient.position.set( 0, 0, 0 );
+scene.add( ambient );
+
+var light = new THREE.SpotLight( 0xffffff );
+light.intensity = 0.8;
 light.position.set( 0, 0, 0 );
+light.castShadow = true;
+
+light.angle = Math.PI / 2;
+var lightTarget = new THREE.Object3D();
+
+lightTarget.position.set(0,0,-1);
+scene.add(lightTarget);
+light.target = lightTarget;
+
+light.shadowCameraVisible = true;
+light.shadowDarkness = 0.95;
+
+light.shadowMapWidth = 1024;
+light.shadowMapHeight = 1024;
+
+light.shadowCameraNear = 0.01;
+light.shadowCameraFar = 800;
+light.shadowCameraFov = 90;
 scene.add( light );
 
-var material = new THREE.MeshPhongMaterial({
-    ambient: 0x030303,
-    color: 0xdddddd,
-    specular: 0x009900,
-    shininess: 30,
-    shading: THREE.FlatShading
+var material = new THREE.MeshLambertMaterial({
+    color: 0xdddddd
 });
 
-var floorGeometry = new THREE.PlaneGeometry(800, 800, 1, 1);
+var wallSize = 800,
+    wallOffset = wallSize / 2;
+
+var floorGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
 var floor = new THREE.Mesh(floorGeometry, material);
-floor.position.z = 400;
-//floor.rotation.x = Math.PI / 2;
+floor.position.y = wallOffset
+floor.rotation.x = Math.PI / 2;
 scene.add(floor);
 
-//var ceilingGeometry = new THREE.PlaneGeometry(800, 800, 1, 1);
-//var ceiling = new THREE.Mesh(ceilingGeometry);
-//ceiling.rotation.z = Math.PI;
-//ceiling.position.y = 400;
-//floor.rotation.x = -Math.PI / 2;
-//scene.add(ceiling);
+var ceilingGeometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var ceiling = new THREE.Mesh(ceilingGeometry, material);
+ceiling.position.y = -wallOffset;
+ceiling.rotation.x = -Math.PI / 2;
+scene.add(ceiling);
 
-geometry = new THREE.CubeGeometry(75, 75, 16);
+var wall1Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall1 = new THREE.Mesh(wall1Geometry, material);
+wall1.position.x = -wallOffset;
+wall1.rotation.y = Math.PI / 2;
+wall1.receiveShadow = true;
+scene.add(wall1);
 
-material = new THREE.MeshPhongMaterial({
-    color: 0x0000ff
-});
+var wall2Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall2 = new THREE.Mesh(wall2Geometry, material);
+wall2.position.x = wallOffset;
+wall2.rotation.y = -Math.PI / 2;
+wall2.receiveShadow = true;
+scene.add(wall2);
 
-cube = new THREE.Mesh(geometry, material);
+var wall3Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall3 = new THREE.Mesh(wall3Geometry, material);
+wall3.position.z = wallOffset;
+wall3.rotation.z = -Math.PI / 2;
+wall3.receiveShadow = true;
+scene.add(wall3);
 
-cube.position.set(80, 0, -400);
-
-cube.receiveShadow = true;
-
-scene.add(cube);
-
-geometry = new THREE.CubeGeometry(75, 75, 16);
-
-material = new THREE.MeshPhongMaterial({
-    color: 0x0000ff
-});
-
-cube2 = new THREE.Mesh(geometry, material);
-
-cube2.position.set(-80, 0, -400);
-
-cube2.castShadow = true;
-
-cube2.receiveShadow = true;
-
-scene.add(cube2);
+var wall4Geometry = new THREE.PlaneGeometry(wallSize, wallSize, 100, 100);
+var wall4 = new THREE.Mesh(wall4Geometry, material);
+wall4.position.z = -wallOffset;
+wall4.rotation.z = -Math.PI / 2;
+wall4.receiveShadow = true;
+scene.add(wall4);
 
 camera.position.fromArray([0, 160, 200]);
 
@@ -114,27 +135,21 @@ createLight = function() {
     return lightVisualizers.push(lightVisualizer);
 };
 
-createLight();
-
-createLight();
-
-createLight();
-
-createLight();
-
 var loader = new THREE.OBJLoader();
-loader.load( 'models/lamp.obj', function ( object ) {
-    object.position.y = - 80;
-    scene.add( object );
+loader.load( 'models/lamp.obj', function ( nest ) {
+    nest.castShadow = true;
+    nest.position.y = - 80;
 
+    nest.traverse( function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+            child.castShadow = true;
+        }
+    });
+    scene.add( nest );
 });
 
 
 render = function() {
-    cube.rotation.x += scope.rate * 0.004;
-    cube.rotation.y += scope.rate * 0.002;
-    cube2.rotation.x += scope.rate * 0.004;
-    cube2.rotation.y += scope.rate * 0.002;
     effect.render(scene, camera);
     controls.update();
     return requestAnimationFrame(render);
