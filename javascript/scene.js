@@ -10,16 +10,16 @@ var group = new THREE.Object3D();
 
 var LampMaterial = new THREE.MeshBasicMaterial();
 
-window.scope = {
+var scope = window.scope = {
     x: 0,
     y: 0,
     light1position: new THREE.Vector3(1, 1, 1),
     rate: 1
 };
 
-window.scene = new THREE.Scene();
+var scene = window.scene = new THREE.Scene();
 
-window.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 10000);
+var camera = window.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 10000);
 
 renderer = new THREE.WebGLRenderer({
     antialias: true
@@ -37,7 +37,7 @@ window.renderer = renderer;
 var vrEffect = new THREE.VREffect(renderer, function( error ) {
     console.error( error );
 });
-window.vrControls = vrControls = new THREE.VRControls(camera);
+var vrControls = window.vrControls = vrControls = new THREE.VRControls(camera);
 
 renderer.shadowMapEnabled = true;
 renderer.setClearColor( 0x646366, 1 );
@@ -51,7 +51,7 @@ onResize = function() {
 
 window.addEventListener('resize', onResize, false);
 
-controls = new THREE.OrbitControls( camera, renderer.domElement );
+var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 document.body.appendChild(renderer.domElement);
 
@@ -169,7 +169,7 @@ var wall3Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
 var wall3 = new THREE.Mesh(wall3Geometry, wall3Material);
 wall3.position.z = wallDepth / 2;
 wall3.rotation.y = Math.PI;
-wall3.rotation.z = Math.PI / 2
+wall3.rotation.z = Math.PI / 2;
 wall3.receiveShadow = true;
 scene.add(wall3);
 
@@ -193,15 +193,15 @@ outlet.position.x = ( wallDepth / 2 ) - 200;
 outlet.position.y = ( -wallHeight / 2 ) + 200;
 scene.add(outlet);
 
-walls = [ wall1, wall2, wall3, frontWall ];
+var walls = [ wall1, wall2, wall3, frontWall ];
 
 camera.position.set(180, -60, 1200);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-window.lights = [];
+var lights = window.lights = [];
 
-window.lightVisualizers = [];
+var lightVisualizers = window.lightVisualizers = [];
 
 createLight = function() {
     var light, lightVisualizer;
@@ -238,13 +238,12 @@ var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
 scene.add( flare );
 
 loader.load( 'models/lampCord.obj', function ( cord ) {
-    cord.scale.set( 16, 15.9, 16 )
+    cord.scale.set( 16, 15.9, 16 );
     cord.position.set( 0, 1050, 0 );
     scene.add( cord );
 });
 
-var starCharm,
-    defaultVariation = 0.5;
+var defaultVariation = 0.5;
 loader.load( 'models/star.obj', function ( star ) {
     
     star.castShadow = true;
@@ -386,13 +385,15 @@ render = function() {
         oculusControls.update(Date.now() - time, vrState);
 
         vrControls.update();
-        vrEffect.render(scene, camera);
+        //vrEffect.render(scene, camera);
 
         //oculusControls.update();
         //group.rotation.y += 0.002;
 
         flare.quaternion.copy( camera.quaternion );
     }
+    renderer.render(scene, camera);
+    controls.update();
 
     time = Date.now();
 
