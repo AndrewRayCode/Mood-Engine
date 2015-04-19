@@ -1,6 +1,18 @@
 (function() {
 
-var createLight, geometry, material, onResize, render, renderer, nest, circleCharm, starCharm, oculusControls;
+var createLight, geometry, material, onResize, render, renderer, nest,
+    circleCharm, starCharm, oculusControls, room;
+
+var SHADOW_MAP_RESOLUTION = 128;
+
+var stats = new window.Stats();
+stats.setMode(0); // 0: fps, 1: ms
+
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+
+document.body.appendChild( stats.domElement );
 
 var time = Date.now();
 
@@ -19,11 +31,14 @@ var scope = window.scope = {
 
 var scene = window.scene = new THREE.Scene();
 
-var camera = window.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 10000);
+var camera = window.camera = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    50000
+);
 
-renderer = new THREE.WebGLRenderer({
-    antialias: true
-});
+renderer = new THREE.WebGLRenderer(/*{ antialias: true }*/);
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -55,8 +70,8 @@ var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 document.body.appendChild(renderer.domElement);
 
-var ambient = new THREE.PointLight( 0xfffafa );
-ambient.intensity = 0.8;
+var ambient = new THREE.PointLight( 0xf0f0ff );
+ambient.intensity = 1.1;
 ambient.position.set( 0, 0, 0 );
 scene.add( ambient );
 
@@ -64,7 +79,7 @@ scene.add( group );
 
 function createShadowCaster( direction ) {
     var light = new THREE.SpotLight( 0xffffff );
-    light.intensity = 0.1;
+    light.intensity = 0.005;
     light.position.set( 0, 0, 0 );
     light.castShadow = true;
 
@@ -78,8 +93,8 @@ function createShadowCaster( direction ) {
     //light.shadowCameraVisible = true;
     light.shadowDarkness = 0.5;
 
-    light.shadowMapWidth = 128;
-    light.shadowMapHeight = 128;
+    light.shadowMapWidth = SHADOW_MAP_RESOLUTION;
+    light.shadowMapHeight = SHADOW_MAP_RESOLUTION;
 
     light.shadowCameraNear = 10;
     light.shadowCameraFar = 3000;
@@ -91,109 +106,28 @@ createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
 // no back wall casting
-//createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
+createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
 
 // ceiling
 createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
 createShadowCaster( new THREE.Vector3( 0, -1, 0 ) );
 
-var wallDepth = 4000,
-    wallHeight = 2200;
+var wallDepth = 8000,
+    wallHeight = 2450;
 
-var floorTexture = new THREE.ImageUtils.loadTexture( 'images/rugfloor.jpg' );
+var floorTexture = new THREE.ImageUtils.loadTexture( 'images/wood.jpg' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
-
-var floorMaterial = new THREE.MeshBasicMaterial({
+floorTexture.repeat.set( 2, 4 );
+var floorMaterial = new THREE.MeshPhongMaterial({
     map: floorTexture
 });
 
 var floorGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 10, 10);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.position.y = -wallHeight / 2;
 floor.rotation.x = -Math.PI / 2;
+floor.position.y = -wallHeight / 2;
 floor.receiveShadow = true;
 scene.add(floor);
-
-//var rugTexture = new THREE.ImageUtils.loadTexture( 'images/persain_rug.jpg' );
-
-//var floorMaterial = new THREE.MeshBasicMaterial({
-    //map: rugTexture
-//});
-
-//var rugGeometry = new THREE.PlaneGeometry(wallDepth / 3, wallDepth / 2, 1, 1);
-//var rug = new THREE.Mesh(rugGeometry, floorMaterial);
-//rug.position.y = ( -wallHeight / 2 ) + 100;
-//rug.rotation.x = -Math.PI / 2;
-//scene.add(rug);
-
-var ceilMaterial = new THREE.MeshLambertMaterial({
-    map: THREE.ImageUtils.loadTexture( 'images/wall.jpg' )
-});
-var ceilingGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 10, 10);
-var ceiling = new THREE.Mesh(ceilingGeometry, ceilMaterial);
-ceiling.position.y = wallHeight / 2;
-ceiling.rotation.x = Math.PI / 2;
-ceiling.receiveShadow = true;
-scene.add(ceiling);
-
-var wallTexture = new THREE.ImageUtils.loadTexture( 'images/walls.jpg' );
-wallTexture.wrapS = wallTexture.wrapT = THREE.RepeatWrapping;
-wallTexture.repeat.set( 2, 4 );
-
-var wall1Material = new THREE.MeshLambertMaterial({
-    map: wallTexture,
-});
-var wall1Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 10, 10);
-var wall1 = new THREE.Mesh(wall1Geometry, wall1Material);
-wall1.position.x = -wallDepth / 2;
-wall1.rotation.y = Math.PI / 2;
-wall1.rotation.z = Math.PI / 2;
-wall1.receiveShadow = true;
-scene.add(wall1);
-
-var wall2Material = new THREE.MeshLambertMaterial({
-    map: wallTexture,
-});
-var wall2Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
-var wall2 = new THREE.Mesh(wall2Geometry, wall2Material);
-wall2.position.x = wallDepth / 2;
-wall2.rotation.y = -Math.PI / 2;
-wall2.rotation.z = -Math.PI / 2;
-wall2.receiveShadow = true;
-scene.add(wall2);
-
-var wall3Material = new THREE.MeshLambertMaterial({
-    map: wallTexture,
-});
-var wall3Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
-var wall3 = new THREE.Mesh(wall3Geometry, wall3Material);
-wall3.position.z = wallDepth / 2;
-wall3.rotation.y = Math.PI;
-wall3.rotation.z = Math.PI / 2;
-wall3.receiveShadow = true;
-scene.add(wall3);
-
-var wall4Material = new THREE.MeshLambertMaterial({
-    map: wallTexture,
-});
-var wall4Geometry = new THREE.PlaneGeometry(wallHeight, wallDepth, 100, 100);
-var frontWall = new THREE.Mesh(wall4Geometry, wall4Material);
-frontWall.position.z = -wallDepth / 2;
-frontWall.rotation.z = -Math.PI / 2;
-frontWall.receiveShadow = true;
-scene.add(frontWall);
-
-var outletMaterial = new THREE.MeshLambertMaterial({
-    map: THREE.ImageUtils.loadTexture( 'images/outlet.jpg' ),
-});
-var outletGeom = new THREE.PlaneGeometry(120, 200, 1, 1);
-var outlet = new THREE.Mesh(outletGeom, outletMaterial);
-outlet.position.z = ( -wallDepth / 2 ) + 200;
-outlet.position.x = ( wallDepth / 2 ) - 200;
-outlet.position.y = ( -wallHeight / 2 ) + 200;
-scene.add(outlet);
-
-var walls = [ wall1, wall2, wall3, frontWall ];
 
 camera.position.set(180, -60, 1200);
 
@@ -214,10 +148,24 @@ createLight = function() {
     return lightVisualizers.push(lightVisualizer);
 };
 
-var loader = new THREE.OBJLoader();
-loader.load( 'models/scaffold.obj', function ( _nest ) {
+var jsonLoader = new THREE.ObjectLoader();
+room = jsonLoader.load( 'models/untitled-scene.json', function( _room ) {
+    // Room is a scene. Find the "room"
+    room = _room.children[ 0 ];
+    room.receiveShadow = true;
+
+    room.material = new THREE.MeshPhongMaterial({
+        color: 0xffffff
+    });
+    scene.add( room );
+
+    var scale = 300;
+    room.scale.set( scale, scale, scale );
+});
+
+var objLoader = new THREE.OBJLoader();
+objLoader.load( 'models/scaffold.obj', function ( _nest ) {
     nest = _nest;
-    nest.castShadow = true;
 
     nest.traverse( function ( child ) {
         if ( child instanceof THREE.Mesh ) {
@@ -228,6 +176,52 @@ loader.load( 'models/scaffold.obj', function ( _nest ) {
     group.add( nest );
 });
 
+objLoader.load( 'models/1.obj', function ( _couch ) {
+    var couch = _couch.children[0];
+    couch.material = new THREE.MeshPhongMaterial({
+        color: 0xeeffff
+    });
+    couch.receiveShadow = true;
+    var couchScale = 90;
+    window.couch = couch;
+
+    couch.rotation.y =  -Math.PI / 2;
+    couch.position.set( 3800, -2500, -3000 );
+
+    couch.scale.set( couchScale, couchScale, couchScale );
+    scene.add( couch );
+});
+
+// Skybox
+
+var path = "images/Park2/";
+var format = ".jpg";
+var urls = [
+    path + 'posx' + format, path + 'negx' + format,
+    path + 'posy' + format, path + 'negy' + format,
+    path + 'posz' + format, path + 'negz' + format
+];
+
+var reflectionCube = THREE.ImageUtils.loadTextureCube( urls );
+reflectionCube.format = THREE.RGBFormat;
+
+var shader = THREE.ShaderLib.cube;
+shader.uniforms.tCube.value = reflectionCube;
+
+var skyboxMaterial = new THREE.ShaderMaterial( {
+    fragmentShader: shader.fragmentShader,
+    vertexShader: shader.vertexShader,
+    uniforms: shader.uniforms,
+    depthWrite: false,
+    side: THREE.BackSide
+}),
+
+mesh = new THREE.Mesh( new THREE.BoxGeometry( 100, 100, 100 ), skyboxMaterial );
+var skyboxScale = 500;
+mesh.scale.set( skyboxScale, skyboxScale, skyboxScale );
+scene.add( mesh );
+
+
 var flareGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
 var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
     blending: THREE.AdditiveBlending,
@@ -237,19 +231,19 @@ var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
 }));
 scene.add( flare );
 
-loader.load( 'models/lampCord.obj', function ( cord ) {
+objLoader.load( 'models/lampCord.obj', function ( cord ) {
     cord.scale.set( 16, 15.9, 16 );
     cord.position.set( 0, 1050, 0 );
     scene.add( cord );
 });
 
 var defaultVariation = 0.5;
-loader.load( 'models/star.obj', function ( star ) {
+objLoader.load( 'models/star.obj', function ( star ) {
     
     star.castShadow = true;
     var geometry = star.children[0].geometry;
 
-    for (var i = 0; i < 10; i++){
+    for (var i = 0; i < 10 ; i++){
         var xRot = randFloat( -Math.PI / 2, Math.PI / 2 );
         var zRot = Math.random() * Math.PI * 2;
 
@@ -306,7 +300,7 @@ loader.load( 'models/star.obj', function ( star ) {
 
 var charms = window.charms = [];
 
-loader.load( 'models/circle.obj', function ( circle ) {
+objLoader.load( 'models/circle.obj', function ( circle ) {
     
     circle.castShadow = true;
     var geometry = circle.children[0].geometry;
@@ -369,6 +363,8 @@ var scale = 50;
 
 render = function() {
 
+    stats.begin();
+
     var vrState = vrControls.getVRState();
 
     if( vrState && vrState.hmd ) {
@@ -390,12 +386,14 @@ render = function() {
         //oculusControls.update();
         //group.rotation.y += 0.002;
 
-        flare.quaternion.copy( camera.quaternion );
     }
+    flare.quaternion.copy( camera.quaternion );
     renderer.render(scene, camera);
     controls.update();
 
     time = Date.now();
+
+    stats.end();
 
     requestAnimationFrame(render);
 };
