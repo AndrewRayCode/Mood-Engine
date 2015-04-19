@@ -4,6 +4,7 @@ var createLight, geometry, material, onResize, render, renderer, nest,
     circleCharm, starCharm, oculusControls, room;
 
 var SHADOW_MAP_RESOLUTION = 256;
+var ROOM_SCALE = 400;
 
 var stats = new window.Stats();
 stats.setMode(0); // 0: fps, 1: ms
@@ -97,7 +98,7 @@ function createShadowCaster( direction ) {
     light.shadowMapHeight = SHADOW_MAP_RESOLUTION;
 
     light.shadowCameraNear = 10;
-    light.shadowCameraFar = 3000;
+    light.shadowCameraFar = 5000;
     light.shadowCameraFov = 90;
     scene.add( light );
 }
@@ -159,8 +160,7 @@ jsonLoader.load( 'models/untitled-scene.json', function( _room ) {
     });
     scene.add( room );
 
-    var scale = 300;
-    room.scale.set( scale, scale, scale );
+    room.scale.set( ROOM_SCALE, ROOM_SCALE, ROOM_SCALE );
 });
 
 var objLoader = new THREE.OBJLoader();
@@ -186,7 +186,7 @@ objLoader.load( 'models/1.obj', function ( _couch ) {
     window.couch = couch;
 
     couch.rotation.y =  -Math.PI / 2;
-    couch.position.set( 3800, -2500, -3000 );
+    couch.position.set( 3800, -2600, -3000 );
 
     couch.scale.set( couchScale, couchScale, couchScale );
     scene.add( couch );
@@ -194,12 +194,12 @@ objLoader.load( 'models/1.obj', function ( _couch ) {
 
 // Skybox
 
-var path = "images/Park2/";
+var path = "images/MilkyWay/dark-s_";
 var format = ".jpg";
 var urls = [
-    path + 'posx' + format, path + 'negx' + format,
-    path + 'posy' + format, path + 'negy' + format,
-    path + 'posz' + format, path + 'negz' + format
+    path + 'px' + format, path + 'nx' + format,
+    path + 'py' + format, path + 'ny' + format,
+    path + 'pz' + format, path + 'nz' + format
 ];
 
 var reflectionCube = THREE.ImageUtils.loadTextureCube( urls );
@@ -214,12 +214,13 @@ var skyboxMaterial = new THREE.ShaderMaterial( {
     uniforms: shader.uniforms,
     depthWrite: false,
     side: THREE.BackSide
-}),
+});
 
-mesh = new THREE.Mesh( new THREE.BoxGeometry( 100, 100, 100 ), skyboxMaterial );
+var skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 100, 100, 100 ), skyboxMaterial );
 var skyboxScale = 500;
-mesh.scale.set( skyboxScale, skyboxScale, skyboxScale );
-scene.add( mesh );
+skyboxMesh.rotation.x -= Math.PI / 2;
+skyboxMesh.scale.set( skyboxScale, skyboxScale, skyboxScale );
+scene.add( skyboxMesh );
 
 
 var flareGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
@@ -411,6 +412,11 @@ Mousetrap.bind('space', function() {
     }
     camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
     toggled = !toggled;
+});
+
+Mousetrap.bind('s', function() {
+    stats.domElement.style.display =
+        stats.domElement.style.display === 'block' ? 'none' : 'block';
 });
 
 function randFloat(min, max) {
