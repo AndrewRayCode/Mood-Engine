@@ -85,15 +85,21 @@ function pinch( hand ) {
     Leap.vec3.multiply(offsetForward, offsetForward, [30, 30, 30]);
     Leap.vec3.add(pos, pos, offsetForward);
 
-    var pinchPosition = handMesh.position.clone().add(
-        new THREE.Vector3( pos[0], pos[1], pos[2] )
-    );
+    var pinchPosition = handMesh.position.clone();
+    // Why did we have this??
+    //.add(
+        //new THREE.Vector3( pos[0], pos[1], pos[2] )
+    //);
+    //window.sphere.position.copy( pinchPosition );
 
     var ray = new THREE.Raycaster( window.camera.position, pinchPosition.sub( window.camera.position ).normalize() );
     var intersects = ray.intersectObject( window.room );
 
     // if there is one (or more) intersections
     if ( intersects.length ) {
+
+        window.sphere.position.copy( intersects[0].point.clone() );
+
         surfacePoint.position = intersects[0].point.normalize().multiplyScalar( 100 );
 
         if( !dragging ) {

@@ -62,7 +62,6 @@ onResize = function() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    //effect.setSize(window.innerWidth, window.innerHeight);
 };
 
 window.addEventListener('resize', onResize, false);
@@ -130,6 +129,12 @@ floor.position.y = -wallHeight / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
+var sphereGeometry = new THREE.SphereGeometry(60, 60, 10, 10);
+var sphere = window.sphere = new THREE.Mesh(sphereGeometry, new THREE.MeshBasicMaterial({
+    color: 0xff0000
+}));
+//scene.add(sphere);
+
 camera.position.set(180, -60, 1200);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -165,14 +170,9 @@ jsonLoader.load( 'models/untitled-scene.json', function( _room ) {
 
 var objLoader = new THREE.OBJLoader();
 objLoader.load( 'models/scaffold.obj', function ( _nest ) {
-    nest = _nest;
-
-    nest.traverse( function ( child ) {
-        if ( child instanceof THREE.Mesh ) {
-            child.castShadow = true;
-        }
-    });
-    nest.material = new THREE.MeshBasicMaterial();
+    nest = _nest.children[ 0 ];
+    nest.castShadow = true;
+    //nest.material = new THREE.MeshBasicMaterial();
     group.add( nest );
 });
 
