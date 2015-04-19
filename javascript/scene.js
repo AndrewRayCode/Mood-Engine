@@ -3,7 +3,7 @@
 var createLight, geometry, material, onResize, render, renderer, nest,
     circleCharm, starCharm, oculusControls, room;
 
-var SHADOW_MAP_RESOLUTION = 128;
+var SHADOW_MAP_RESOLUTION = 256;
 
 var stats = new window.Stats();
 stats.setMode(0); // 0: fps, 1: ms
@@ -79,7 +79,7 @@ scene.add( group );
 
 function createShadowCaster( direction ) {
     var light = new THREE.SpotLight( 0xffffff );
-    light.intensity = 0.005;
+    light.intensity = 0.0;
     light.position.set( 0, 0, 0 );
     light.castShadow = true;
 
@@ -105,10 +105,10 @@ function createShadowCaster( direction ) {
 createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
-// no back wall casting
-createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
+//// no back wall casting
+//createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
 
-// ceiling
+//// ceiling
 createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
 createShadowCaster( new THREE.Vector3( 0, -1, 0 ) );
 
@@ -149,9 +149,9 @@ createLight = function() {
 };
 
 var jsonLoader = new THREE.ObjectLoader();
-room = jsonLoader.load( 'models/untitled-scene.json', function( _room ) {
+jsonLoader.load( 'models/untitled-scene.json', function( _room ) {
     // Room is a scene. Find the "room"
-    room = _room.children[ 0 ];
+    window.room = room = _room.children[ 0 ];
     room.receiveShadow = true;
 
     room.material = new THREE.MeshPhongMaterial({
