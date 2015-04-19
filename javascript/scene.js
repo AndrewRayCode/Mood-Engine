@@ -1,10 +1,15 @@
+/* global SPE:true */
 (function() {
 
-var createLight, geometry, material, onResize, render, renderer, nest,
+var geometry, material, onResize, render, renderer, nest,
     circleCharm, starCharm, oculusControls, room;
 
-var SHADOW_MAP_RESOLUTION = 256;
+var SHADOW_MAP_RESOLUTION = 1024;
 var ROOM_SCALE = 400;
+
+var clock = new THREE.Clock();
+
+var lights = window.lights = [];
 
 var stats = new window.Stats();
 stats.setMode(0); // 0: fps, 1: ms
@@ -12,12 +17,14 @@ stats.setMode(0); // 0: fps, 1: ms
 stats.domElement.style.position = 'absolute';
 stats.domElement.style.left = '0px';
 stats.domElement.style.top = '0px';
+stats.domElement.style.display = 'none';
 
 document.body.appendChild( stats.domElement );
 
 var time = Date.now();
 
-var cubes = window.cubes = [];
+var charms = window.charms = [];
+var charmBoundingBoxes = window.charmBoundingBoxes = [];
 
 var group = new THREE.Object3D();
 
@@ -39,7 +46,7 @@ var camera = window.camera = new THREE.PerspectiveCamera(
     50000
 );
 
-renderer = new THREE.WebGLRenderer(/*{ antialias: true }*/);
+renderer = new THREE.WebGLRenderer({ antialias: true });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -49,6 +56,40 @@ scene.add(oculusControls.getObject());
 window.camera = camera;
 window.scene = scene;
 window.renderer = renderer;
+
+// Particles
+// Create a particle group to add the emitter to.
+var particleGroup = new SPE.Group({
+    // Give the particles in this group a texture
+    texture: THREE.ImageUtils.loadTexture('images/flare.png'),
+    // How long should the particles live for? Measured in seconds.
+    maxAge: 5
+});
+
+// Create a single emitter
+var particleEmitter = window.emitter = new SPE.Emitter({
+    type: 'sphere',
+    position: new THREE.Vector3(0, 100000, 0),
+    blending: THREE.NoBlending,
+    radius: 20,
+    speed: 100,
+    particlesPerSecond: 500,
+    sizeStart: 400,
+    sizeEnd: 300,
+    opacityStart: 1,
+    opacityEnd: 0,
+    angleAlignVelocity: 1,
+    colorStart: new THREE.Color('white'),
+    colorStartSpread: new THREE.Vector3(100, 100, 100),
+    colorEndSpread: new THREE.Vector3(100, 100, 100)
+});
+
+// Add the emitter to the group.
+window.particleGroup = particleGroup;
+particleGroup.addEmitter( particleEmitter );
+
+// Add the particle group to the scene so it can be drawn.
+scene.add( particleGroup.mesh ); // Where `scene` is an instance of `THREE.Scene`.
 
 var vrEffect = new THREE.VREffect(renderer, function( error ) {
     console.error( error );
@@ -81,12 +122,15 @@ function createShadowCaster( direction ) {
     var light = new THREE.SpotLight( 0xffffff );
     light.intensity = 0.0;
     light.position.set( 0, 0, 0 );
+
+    //lights.push( light );
+
     light.castShadow = true;
 
     light.angle = Math.PI / 2;
     var lightTarget = new THREE.Object3D();
 
-    lightTarget.position = direction.clone();
+    lightTarget.position.copy( direction );
     scene.add(lightTarget);
     light.target = lightTarget;
 
@@ -106,7 +150,7 @@ createShadowCaster( new THREE.Vector3( 0, 0, -1 ) );
 createShadowCaster( new THREE.Vector3( -1, 0, 0 ) );
 createShadowCaster( new THREE.Vector3( 1, 0, 0 ) );
 //// no back wall casting
-//createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
+createShadowCaster( new THREE.Vector3( 0, 0, 1 ) );
 
 //// ceiling
 createShadowCaster( new THREE.Vector3( 0, 1, 0 ) );
@@ -122,7 +166,7 @@ var floorMaterial = new THREE.MeshPhongMaterial({
     map: floorTexture
 });
 
-var floorGeometry = new THREE.PlaneGeometry(wallDepth, wallDepth, 10, 10);
+var floorGeometry = new THREE.PlaneBufferGeometry(wallDepth, wallDepth, 10, 10);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = -wallHeight / 2;
@@ -133,26 +177,14 @@ var sphereGeometry = new THREE.SphereGeometry(60, 60, 10, 10);
 var sphere = window.sphere = new THREE.Mesh(sphereGeometry, new THREE.MeshBasicMaterial({
     color: 0xff0000
 }));
-//scene.add(sphere);
+sphere.visible = false;
+scene.add(sphere);
 
 camera.position.set(180, -60, 1200);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-var lights = window.lights = [];
-
 var lightVisualizers = window.lightVisualizers = [];
-
-createLight = function() {
-    var light, lightVisualizer;
-    light = new THREE.PointLight(0xffffff, 0, 1000);
-    scene.add(light);
-    lights.push(light);
-    lightVisualizer = new THREE.Mesh(new THREE.SphereGeometry(4), new THREE.MeshBasicMaterial(0x555555));
-    scene.add(lightVisualizer);
-    lightVisualizer.visible = false;
-    return lightVisualizers.push(lightVisualizer);
-};
 
 var jsonLoader = new THREE.ObjectLoader();
 jsonLoader.load( 'models/untitled-scene.json', function( _room ) {
@@ -223,7 +255,7 @@ skyboxMesh.scale.set( skyboxScale, skyboxScale, skyboxScale );
 scene.add( skyboxMesh );
 
 
-var flareGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);
+var flareGeometry = new THREE.PlaneBufferGeometry(500, 500, 100, 100);
 var flare = new THREE.Mesh(flareGeometry, new THREE.MeshBasicMaterial({
     blending: THREE.AdditiveBlending,
     transparent: true,
@@ -241,7 +273,6 @@ objLoader.load( 'models/lampCord.obj', function ( cord ) {
 var defaultVariation = 0.5;
 objLoader.load( 'models/star.obj', function ( star ) {
     
-    star.castShadow = true;
     var geometry = star.children[0].geometry;
 
     for (var i = 0; i < 10 ; i++){
@@ -266,8 +297,8 @@ objLoader.load( 'models/star.obj', function ( star ) {
             })
         );
 
-        //charm.rotation.order = "ZXY";
-        //charm.up = new THREE.Vector3(0, 1, 0);
+        charm.castShadow = true;
+
         charm.rotation.x = xRot;
         charm.rotation.z = zRot;
 
@@ -284,22 +315,20 @@ objLoader.load( 'models/star.obj', function ( star ) {
         var height = BB.max.y - BB.min.y;
         var depth = BB.max.z - BB.min.z;
 
-        var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth));
+        var cube = new THREE.Mesh(new THREE.BoxGeometry(width,height,depth));
 
         cube.position.x = x;
         cube.position.y = y;
         cube.position.z = z;
         cube.visible = false;
     
-        charm.add(cube);
+        charm.add( cube );
         group.add( charm );
-        cubes.push( cube );
-        charm.castShadow = true;
+
+        charmBoundingBoxes.push( cube );
 
     }
 });
-
-var charms = window.charms = [];
 
 objLoader.load( 'models/circle.obj', function ( circle ) {
     
@@ -343,7 +372,7 @@ objLoader.load( 'models/circle.obj', function ( circle ) {
         var height = BB.max.y - BB.min.y;
         var depth = BB.max.z - BB.min.z;
 
-        var cube = new THREE.Mesh(new THREE.CubeGeometry(width,height,depth));
+        var cube = new THREE.Mesh(new THREE.BoxGeometry(width,height,depth));
 
         cube.position.x = x;
         cube.position.y = y;
@@ -354,7 +383,9 @@ objLoader.load( 'models/circle.obj', function ( circle ) {
         cube.name = 'circle_cube' + i;
         charm.name = 'circle_charm' + i;
         group.add( charm );
-        cubes.push( cube );
+
+        charmBoundingBoxes.push( cube );
+
         charm.castShadow = true;
 
     }
@@ -391,6 +422,7 @@ render = function() {
     flare.quaternion.copy( camera.quaternion );
     renderer.render(scene, camera);
     controls.update();
+    particleGroup.tick(clock.getDelta());
 
     time = Date.now();
 
@@ -401,7 +433,7 @@ render = function() {
 
 render();
 
-var toggled = false;
+var toggled = true;
 Mousetrap.bind('space', function() {
     if( toggled ) {
         camera.position.set( 0, 0, 150 );
@@ -415,8 +447,12 @@ Mousetrap.bind('space', function() {
 });
 
 Mousetrap.bind('s', function() {
+
     stats.domElement.style.display =
         stats.domElement.style.display === 'block' ? 'none' : 'block';
+
+    sphere.visible = !sphere.visible;
+
 });
 
 function randFloat(min, max) {

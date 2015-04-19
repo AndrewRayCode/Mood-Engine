@@ -6,8 +6,7 @@ var vr = new THREE.VREffect(window.renderer, function( error ) {
 
 var hasVR = !error;
 
-var controller, makeLight, positionLight, releaseLight, dragging,
-    oldRotation;
+var controller, makeLight, positionLight, releaseLight, dragging;
 
 window.controller = controller = new Leap.Controller({
     background: true,
@@ -92,42 +91,44 @@ function pinch( hand ) {
     //);
     //window.sphere.position.copy( pinchPosition );
 
-    var ray = new THREE.Raycaster( window.camera.position, pinchPosition.sub( window.camera.position ).normalize() );
-    var intersects = ray.intersectObject( window.room );
+    var ray = new THREE.Raycaster(
+        window.camera.position,
+        pinchPosition.clone().sub( window.camera.position ).normalize()
+    );
+    var intersects = ray.intersectObject( window.room, true ),
+        intersectionPoint;
 
     // if there is one (or more) intersections
     if ( intersects.length ) {
 
-        window.sphere.position.copy( intersects[0].point.clone() );
+        intersectionPoint = intersects[0].point.clone();
 
-        surfacePoint.position = intersects[0].point.normalize().multiplyScalar( 100 );
+        window.sphere.position.copy( intersectionPoint );
 
         if( !dragging ) {
 
             var charmRay = new THREE.Raycaster(
                 new THREE.Vector3( 0, 0, 0 ),
-                surfacePoint.position.normalize()
+                intersectionPoint.clone().normalize()
             );
 
-            var charmIntersects = charmRay.intersectObjects( window.cubes );
+            var charmIntersects = charmRay.intersectObjects(
+                window.charmBoundingBoxes, true
+            );
 
             if( charmIntersects.length ) {
                 dragging = charmIntersects[0];
-                oldRotation = surfacePoint.position.clone().normalize();
             }
         }
 
     }
 
-    if( dragging ) {
+    if( dragging && intersectionPoint ) {
+
+        window.emitter.position = intersectionPoint.clone();
 
         var charm = dragging.object.parent,
-            charmVectorOld = new THREE.Vector3(
-                oldRotation.x,
-                oldRotation.y,
-                oldRotation.z
-            ).normalize(),
-            charmVectorNew = surfacePoint.position.clone().normalize();
+            charmVectorNew = intersectionPoint.normalize();
 
         var quaternion = new THREE.Quaternion();
         quaternion.setFromUnitVectors(
@@ -137,7 +138,10 @@ function pinch( hand ) {
 
         charm.quaternion.copy( quaternion );
 
-        oldRotation = charmVectorNew.clone();
+    } else {
+
+        window.emitter.position = new THREE.Vector3( 0, 1000, 0 );
+
     }
 }
 
