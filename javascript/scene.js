@@ -69,7 +69,7 @@ var particleGroup = new SPE.Group({
 // Create a single emitter
 var particleEmitter = window.emitter = new SPE.Emitter({
     type: 'sphere',
-    position: new THREE.Vector3(0, 100000, 0),
+    position: new THREE.Vector3(0, 0, 0),
     blending: THREE.NoBlending,
     radius: 20,
     speed: 100,
@@ -81,7 +81,8 @@ var particleEmitter = window.emitter = new SPE.Emitter({
     angleAlignVelocity: 1,
     colorStart: new THREE.Color('white'),
     colorStartSpread: new THREE.Vector3(100, 100, 100),
-    colorEndSpread: new THREE.Vector3(100, 100, 100)
+    colorEndSpread: new THREE.Vector3(100, 100, 100),
+    alive: 0
 });
 
 // Add the emitter to the group.

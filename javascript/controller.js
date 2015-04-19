@@ -126,6 +126,7 @@ function pinch( hand ) {
     if( dragging && intersectionPoint ) {
 
         window.emitter.position = intersectionPoint.clone();
+        window.emitter.alive = 1;
 
         var charm = dragging.object.parent,
             charmVectorNew = intersectionPoint.normalize();
@@ -137,10 +138,6 @@ function pinch( hand ) {
         );
 
         charm.quaternion.copy( quaternion );
-
-    } else {
-
-        window.emitter.position = new THREE.Vector3( 0, 1000, 0 );
 
     }
 }
@@ -160,6 +157,7 @@ var positionHand = function(hand) {
         } else if (hand.data('pinching')) {
             releasePinch( hand );
             hand.data('pinching', false);
+            window.emitter.alive = 0;
         }
     }
 };
